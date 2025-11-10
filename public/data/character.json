@@ -1,0 +1,233 @@
+[
+    {
+        "name": "사츠키",
+        "alias": [],
+        "skills": [
+            {
+                "type": "EX",
+                "alias": [],
+                "role": ["attack"],
+                "delays": [1.3, 1.9, 2.1, 2.6, 3.2, 3.3, 4.3, 4.6, 4.9, 5.25, 5.85, 6.25],
+                "duration": 0
+            }
+        ],
+        "UE2": false
+    },
+    {
+        "name": "히나(드레스)",
+        "alias": ["드히나"],
+        "skills": [
+            {
+                "type": "1타",
+                "alias": [],
+                "role": ["attack"],
+                "delays": [0.467, 0.55, 0.6],
+                "duration": 0
+            },
+            {
+                "type": "2타",
+                "alias": [],
+                "role": ["attack"],
+                "delays": [0.467, 0.55, 0.6],
+                "duration": 0
+            },
+            {
+                "type": "3타",
+                "alias": [],
+                "role": ["attack"],
+                "delays": [0.5, 0.567, 0.633, 0.700, 0.767, 0.833, 0.9],
+                "duration": 0
+            }
+        ],
+        "UE2": false
+    },
+    {
+        "name": "노조미",
+        "alias": [],
+        "skills": [
+            {
+                "type": "EX",
+                "alias": [],
+                "role": ["attack"],
+                "delays": [2.5, 2.6, 2.633, 2.7, 2.733],
+                "duration": 0
+            }
+        ],
+        "UE2": false
+    },
+    {
+        "name": "나구사",
+        "alias": [],
+        "skills": [
+            {
+                "type": "EX",
+                "alias": [],
+                "role": ["attack"],
+                "delays": [3.8, 3.867, 3.933, 4.0],
+                "duration": 0
+            }
+        ],
+        "UE2": false
+    },
+    {
+        "name": "네루(교복)",
+        "alias": ["교네루"],
+        "skills": [
+            {
+                "type": "EX",
+                "alias": [],
+                "role": ["attack"],
+                "delays": [0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.8, 1.9, 2, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 4.267, 4.333, 4.4, 4.533, 4.7, 4.767, 4.867, 4.967, 5.1, 5.2, 5.267, 5.367, 5.467, 5.533, 5.667, 5.767, 5.833, 5.967, 6.033, 6.133, 6.2, 6.233],
+                "duration": 0
+            }
+        ],
+        "UE2": false
+    },
+    {
+        "name": "시로코(수영복)", 
+        "alias": ["수로코"],
+        "skills": [
+            {
+                "type": "EX",
+                "alias": [],
+                "role": ["attack", "support"],
+                "delays": [1.7],
+                "duration": 30
+            }
+        ],
+        "UE2": false
+    },
+    {
+        "name": "사쿠라코(아이돌)",
+        "alias": ["돌쿠라코"],
+        "skills": [
+            {
+                "type": "EX",
+                "alias": [],
+                "role": ["support"],
+                "delays": [0.5],
+                "duration": 17
+            }
+        ],
+        "UE2": true
+    },
+    {
+        "name": "아스나(교복)",
+        "alias": ["교스나"],
+        "skills": [
+            {
+                "type": "EX",
+                "alias": [],
+                "role": ["support"],
+                "delays": [1.7],
+                "duration": 19
+            }
+        ],
+        "UE2": true
+    },
+    {
+        "name": "키사키",
+        "alias": [],
+        "skills": [
+            {
+                "type": "EX",
+                "alias": [],
+                "role": ["support"],
+                "delays": [1.7],
+                "duration": 15
+            }
+        ],
+        "UE2": true
+    },
+    {
+        "name": "아루(드레스)",
+        "alias": ["드아루"],
+        "skills": [
+            {
+                "type": "EX",
+                "alias": [],
+                "role": ["support"],
+                "delays": [1.4],
+                "duration": 30
+            }
+        ],
+        "UE2": false
+    },
+    {
+        "name": "리오",
+        "alias": [],
+        "skills": [
+            {
+                "type": "EX",
+                "alias": [],
+                "role": ["support"],
+                "delays": [3.9],
+                "duration": 20
+            },
+            {
+                "type": "1스",
+                "alias": [],
+                "role": ["support"],
+                "delays": [1.0],
+                "duration": 19
+            }
+        ],
+        "UE2": true
+    },
+    {
+        "name": "호시노(수영복)",
+        "alias": ["수시노"],
+        "skills": [
+            {
+                "type": "EX",
+                "alias": [],
+                "role": ["support"],
+                "delays": [0.8],
+                "duration": 50
+            }
+        ],
+        "UE2": false
+    },
+    {
+        "name": "히카리",
+        "alias": [],
+        "skills": [
+            {
+                "type": "EX",
+                "alias": [],
+                "role": ["support"],
+                "delays": [3.3],
+                "duration": 32
+            }
+        ],
+        "UE2": true
+    }, 
+    {
+        "name": "우이(수영복)",
+        "alias": ["수우이"],
+        "skills": [
+            {
+                "type": "EX",
+                "alias": [],
+                "role": ["support"],
+                "delays": [1.8],
+                "duration": 45
+            }
+        ],
+        "UE2": false 
+    }, 
+    {
+        "name": "칸나(수영복)",
+        "alias": ["수칸나"],
+        "skills": [
+            {
+                "type": "EX",
+                "alias": [],
+                "role": ["support"],
+                "delays": [0.9],
+                "duration": 20
+            }
+        ],
+        "UE2": true
+    }
+]

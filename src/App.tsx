@@ -1,23 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import logo from './logo.svg';
-import './App.css';
+import Timeline from './components/Timeline';
+import RegexParser from './components/RegexParser';
 
 function App() {
+  const [parsedData, setParsedData] = useState<{time: string; character: string; type: string | null; target: string | null}[] | null>(null);
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+        <Timeline parsedData={parsedData}></Timeline>
+        <RegexParser onParse={setParsedData}></RegexParser>
       </header>
     </div>
   );
