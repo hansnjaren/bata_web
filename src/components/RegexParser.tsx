@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, FormEvent } from "react";
 
 const pattern = /\(?(\d{2}:\d{2}\.\d{3})\)?\s*C?([^\s>]+)(?:\s*(ON|\d타|\d스))?(?:>([^\s]+))?/g;
 
@@ -16,6 +16,7 @@ interface RegexParserProps {
 export default function RegexParser({ onParse }: RegexParserProps) {
   const [input, setInput] = useState("");
   const [parseResults, setParseResults] = useState<string | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   useEffect(() => {
     if (input) {
@@ -37,13 +38,22 @@ export default function RegexParser({ onParse }: RegexParserProps) {
     }
   }, [input, onParse]);
 
+  const handleInput = (e: FormEvent<HTMLTextAreaElement>) => {
+    setInput(e.currentTarget.value);
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
+    }
+  }
+
   return (
     <div>
       <textarea
+        ref={textareaRef}
         placeholder="입력하세요..."
         value={input}
-        onChange={(e) => setInput(e.target.value)}
-        style={{ width: "100%", height: "150px", fontSize: 16 }}
+        onChange={handleInput}
+        style={{ width: '100%', boxSizing: 'border-box', overflow: 'hidden', resize: 'none' }}
       />
       <pre style={{ backgroundColor: "#eee", padding: 10, minHeight: 100 }}>
         {parseResults}

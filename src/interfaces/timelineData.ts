@@ -14,7 +14,8 @@ interface AttackSkill {
 }
 
 interface BuffSkill {
-    time: number;
+    startTime: number;
+    delay: number;
     duration: number;
     character: string;
     detail: string;

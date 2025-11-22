@@ -108,7 +108,8 @@ export default function Timeline({ parsedData }: TimelineProps) {
       const tSec = timeStringToSec(time);
       return [
         {
-          time: tSec + (result.skill.delays[0] || 0),
+          startTime: tSec,
+          delay: result.skill.delays[0] || 0,
           duration: result.skill.duration,
           character: result.name,
           detail: result.skill.type,
