@@ -110,7 +110,7 @@ export default function TimelineGraph({
     return (
         <div>
             
-            <h3>TL 표기 시작/종료</h3>
+            {/* <h3>TL 표기 시작/종료</h3>
             <div>
                 <b>시작: </b> {maxTime.toFixed(3)}
                 <br />
@@ -151,7 +151,7 @@ export default function TimelineGraph({
                     스킬 ID: {skillTypes.findIndex(([character, detail]) => character === item.character && detail === item.detail)}
                 </div>
                 );
-            })}
+            })} */}
 
             <h3>시각화 블럭</h3>
             <div style={{ padding: '10px' }}>

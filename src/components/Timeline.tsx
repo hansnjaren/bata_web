@@ -1,5 +1,32 @@
 import React, { useEffect, useState } from "react";
 import TimelineGraph from "./TimelineGraph";
+import { useLocation, useNavigate } from "react-router-dom";
+
+function GoToButtonWithData({ 
+  children, 
+  route, 
+  parsedData, 
+  attackItems, 
+  buffItems, 
+  checkedUE2 
+} : { 
+  children?: React.ReactNode, 
+  route: string, 
+  parsedData: ParseResult[], 
+  attackItems: AttackSkill[], 
+  buffItems: BuffSkill[], 
+  checkedUE2: Record<string, boolean>
+}) {
+  const navigate = useNavigate();
+  const data = { parsedData, attackItems, buffItems, checkedUE2 };
+
+  const goToParser = () => {
+    navigate(route, { state: data });
+  };
+
+  return <button onClick={goToParser}>{children}</button>;
+}
+
 
 const timeStringToSec = (str: string) => {
   const [m, s] = str.split(":");
@@ -33,9 +60,10 @@ function findCanonicalNameAndSkill(
   return { name: char.name, skill };
 }
 
-export default function Timeline({ parsedData }: TimelineProps) {
+export default function Timeline({ parsedData, sentAttackItems, sentBuffItems, sentCheckedUE2 }: TimelineProps) {
   const [characters, setCharacters] = useState<Character[]>([]);
   const [enemies, setEnemies] = useState<Enemy>([]);
+  const location = useLocation();
 
   useEffect(() => {
     async function fetchData() {
@@ -60,63 +88,65 @@ export default function Timeline({ parsedData }: TimelineProps) {
   }, []);
 
   const attackItems: AttackSkill[] =
-    parsedData?.flatMap(({ time, character, type, target }) => {
-      // 캐릭터+type에서 공격용 스킬 찾기
-      const result = findCanonicalNameAndSkill(
-        character,
-        type,
-        characters,
-        "attack"
-      );
-      if (!result) return [];
-      // 조건: target이 null이거나 enemies 목록에 있어야 함
-      if (target !== null && !enemies.includes(target)) return [];
-      const tSec = timeStringToSec(time);
-      return [
-        {
-          startTime: tSec,
-          character: result.name,
-          detail: result.skill.type,
-          allDelays: result.skill.delays, // 배열 전체 저장
-        },
-      ];
-    }) || [];
+    sentAttackItems ? sentAttackItems : 
+      parsedData?.flatMap(({ time, character, type, target }) => {
+        // 캐릭터+type에서 공격용 스킬 찾기
+        const result = findCanonicalNameAndSkill(
+          character,
+          type,
+          characters,
+          "attack"
+        );
+        if (!result) return [];
+        // 조건: target이 null이거나 enemies 목록에 있어야 함
+        if (target !== null && !enemies.includes(target)) return [];
+        const tSec = timeStringToSec(time);
+        return [
+          {
+            startTime: tSec,
+            character: result.name,
+            detail: result.skill.type,
+            allDelays: result.skill.delays, // 배열 전체 저장
+          },
+        ];
+      }) || [];
 
   const buffItems: BuffSkill[] =
-    parsedData?.flatMap(({ time, character, type, target }) => {
-      const result = findCanonicalNameAndSkill(
-        character,
-        type,
-        characters,
-        "support"
-      );
-      if (!result) return [];
-      // 조건: target이 null이거나 target이 attack 역할 스킬을 갖는 캐릭터일 때만 추가
-      let validTarget = false;
-      if (target === null) {
-        validTarget = true;
-      } else {
-        // target이 공(격) 타입 스킬 가진 캐릭터면 통과
-        const targetChar = characters.find(
-          (c) => c.name === target || c.alias.includes(target)
+    sentBuffItems ? sentBuffItems : 
+      parsedData?.flatMap(({ time, character, type, target }) => {
+        const result = findCanonicalNameAndSkill(
+          character,
+          type,
+          characters,
+          "support"
         );
-        validTarget = !!(
-          targetChar && targetChar.skills.some((s) => s.role.includes("attack"))
-        );
-      }
-      if (!validTarget) return [];
-      const tSec = timeStringToSec(time);
-      return [
-        {
-          startTime: tSec,
-          delay: result.skill.delays[0] || 0,
-          duration: result.skill.duration,
-          character: result.name,
-          detail: result.skill.type,
-          UE2: characters.find((c) => c.name === result.name)?.UE2 ?? false,
-        },
-      ];
-    }) || [];
+        if (!result) return [];
+        // 조건: target이 null이거나 target이 attack 역할 스킬을 갖는 캐릭터일 때만 추가
+        let validTarget = false;
+        if (target === null) {
+          validTarget = true;
+        } else {
+          // target이 공(격) 타입 스킬 가진 캐릭터면 통과
+          const targetChar = characters.find(
+            (c) => c.name === target || c.alias.includes(target)
+          );
+          validTarget = !!(
+            targetChar && targetChar.skills.some((s) => s.role.includes("attack"))
+          );
+        }
+        if (!validTarget) return [];
+        const tSec = timeStringToSec(time);
+        return [
+          {
+            startTime: tSec,
+            delay: result.skill.delays[0] || 0,
+            duration: result.skill.duration,
+            character: result.name,
+            detail: result.skill.type,
+            UE2: characters.find((c) => c.name === result.name)?.UE2 ?? false,
+          },
+        ];
+      }) || [];
 
   const usedCharacters = parsedData
     ? Array.from(new Set(parsedData.map((item) => item.character)))
@@ -129,7 +159,7 @@ export default function Timeline({ parsedData }: TimelineProps) {
   );
 
   const [checkedUE2, setCheckedUE2] = React.useState<Record<string, boolean>>(
-    {}
+    sentCheckedUE2 ? sentCheckedUE2 : {}
   );
 
   const handleCheckboxChange = (name: string) => {
@@ -166,6 +196,16 @@ export default function Timeline({ parsedData }: TimelineProps) {
           </div>
         );
       })}
+      {
+        location.pathname === '/parseTimeline' && 
+        <GoToButtonWithData 
+          route='/tacticEditor' 
+          parsedData={parsedData ? parsedData : []} 
+          attackItems={attackItems} 
+          buffItems={buffItems} 
+          checkedUE2={checkedUE2}
+        >Go to tactic editor with this data</GoToButtonWithData>
+      }
     </div>
   );
 }

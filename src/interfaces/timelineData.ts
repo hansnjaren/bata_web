@@ -40,4 +40,7 @@ interface ParseResult {
 
 interface TimelineProps {
   parsedData: ParseResult[] | null;
+  sentAttackItems?: AttackSkill[]; 
+  sentBuffItems?: BuffSkill[]; 
+  sentCheckedUE2?: Record<string, boolean>;
 }
