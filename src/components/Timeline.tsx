@@ -1,32 +1,5 @@
 import React, { useEffect, useState } from "react";
-
-interface Skill {
-  type: string;
-  alias: string[];
-  role: string[];
-  delays: number[];
-  duration: number;
-}
-
-interface Character {
-  name: string;
-  alias: string[];
-  skills: Skill[];
-  UE2: boolean;
-}
-
-type Enemy = string[];
-
-interface ParseResult {
-  time: string;
-  character: string;
-  type: string | null;
-  target: string | null;
-}
-
-interface TimelineProps {
-  parsedData: ParseResult[] | null;
-}
+import TimelineGraph from "./TimelineGraph";
 
 const timeStringToSec = (str: string) => {
   const [m, s] = str.split(":");
@@ -86,7 +59,7 @@ export default function Timeline({ parsedData }: TimelineProps) {
     fetchData();
   }, []);
 
-  const attackItems =
+  const attackItems: AttackSkill[] =
     parsedData?.flatMap(({ time, character, type, target }) => {
       // 캐릭터+type에서 공격용 스킬 찾기
       const result = findCanonicalNameAndSkill(
@@ -109,7 +82,7 @@ export default function Timeline({ parsedData }: TimelineProps) {
       ];
     }) || [];
 
-  const buffItems =
+  const buffItems: BuffSkill[] =
     parsedData?.flatMap(({ time, character, type, target }) => {
       const result = findCanonicalNameAndSkill(
         character,
@@ -154,8 +127,6 @@ export default function Timeline({ parsedData }: TimelineProps) {
     usedCharacters.includes(name)
   );
 
-  const defaultDurationMultiplier = 1.19;
-
   const [checkedUE2, setCheckedUE2] = React.useState<Record<string, boolean>>(
     {}
   );
@@ -166,36 +137,8 @@ export default function Timeline({ parsedData }: TimelineProps) {
 
   return (
     <div>
-      <h3>공격 타임라인 (스킬 단위)</h3>
-      {attackItems.map((item, i) => (
-        <div key={i} style={{ marginBottom: "14px" }}>
-          <b>캐릭터:</b> {item.character} <b>타입:</b> {item.detail}
-          <br />
-          <span>스킬 실행 시간: {item.startTime.toFixed(3)}초</span>
-          <br />
-          <span>
-            모든 타수 시점:{" "}
-            {item.allDelays
-              .map((d) => (item.startTime + d).toFixed(3))
-              .join(", ")}
-            초
-          </span>
-        </div>
-      ))}
 
-      <h3>버프 타임라인</h3>
-      {buffItems.map((item, i) => {
-        const isChecked = item.UE2 && checkedUE2[item.character];
-        const duration =
-          item.duration * (isChecked ? defaultDurationMultiplier : 1);
-
-        return (
-          <div key={i}>
-            [buff] 시간: {item.time.toFixed(3)}초, 캐릭터: {item.character},
-            지속시간: {duration.toFixed(2)}초
-          </div>
-        );
-      })}
+      <TimelineGraph attackItems={attackItems} buffItems={buffItems} checkedUE2={checkedUE2}></TimelineGraph>
 
       <h3>캐릭터 리스트</h3>
       {filteredCharacters.map((name) => {
