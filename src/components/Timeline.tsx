@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import TimelineGraph from "./TimelineGraph";
 import { useLocation, useNavigate } from "react-router-dom";
+import { timeStringToSec } from "../utils/time";
 
 function GoToButtonWithData({ 
   children, 
@@ -26,12 +27,6 @@ function GoToButtonWithData({
 
   return <button onClick={goToParser}>{children}</button>;
 }
-
-
-const timeStringToSec = (str: string) => {
-  const [m, s] = str.split(":");
-  return parseInt(m) * 60 + parseFloat(s);
-};
 
 // 캐릭터(혹은 스킬)의 alias까지 지원하면서 skill과 name을 함께 찾는 함수
 type Role = "attack" | "support";
