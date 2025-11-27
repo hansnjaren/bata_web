@@ -1,18 +1,28 @@
-import React, { useState } from 'react';
-import logo from './logo.svg';
-import Timeline from '../components/Timeline';
-import RegexParser from '../components/RegexParser';
-import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
-import { GoToButton } from '../App';
+import { useLocation } from "react-router-dom";
+import Timeline from "../components/Timeline";
+import { timeZoneNumMin, widthMultMin } from "../constants/sizes";
 
 export default function TacticEditor() {
   const location = useLocation();
-  const { parsedData = [], attackItems = [], buffItems = [], checkedUE2 = {} } = location.state || {};
+  const {
+    filteredCharacterNames = [],
+    attackItems = [],
+    buffItems = [],
+    checkedUE2 = {},
+    widthMult = widthMultMin,
+    timeZoneNum = timeZoneNumMin,
+  } = location.state || {};
   return (
     <div className="App">
-        <header className="App-header">
-        </header>
-        <Timeline parsedData={parsedData} sentAttackItems={attackItems} sentBuffItems={buffItems} sentCheckedUE2={checkedUE2}></Timeline>
+      <header className="App-header"></header>
+      <Timeline
+        sentFilteredCharacterNames={filteredCharacterNames}
+        sentAttackItems={attackItems}
+        sentBuffItems={buffItems}
+        sentCheckedUE2={checkedUE2}
+        sentWidthMult={widthMult}
+        sentTimeZoneNum={timeZoneNum}
+      ></Timeline>
     </div>
   );
 }

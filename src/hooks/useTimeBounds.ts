@@ -1,8 +1,19 @@
 import { useEffect, useState } from "react";
 import { defaultDurationMultiplier } from "../constants/skills";
 
-type AttackSkill = { startTime: number; allDelays: number[]; character: string; detail: string };
-type BuffSkill = { startTime: number; delay: number; duration: number; character: string; detail: string };
+type AttackSkill = {
+  startTime: number;
+  allDelays: number[];
+  character: string;
+  detail: string;
+};
+type BuffSkill = {
+  startTime: number;
+  delay: number;
+  duration: number;
+  character: string;
+  detail: string;
+};
 
 export const useTimeBounds = (
   attackItems: AttackSkill[],
@@ -16,16 +27,20 @@ export const useTimeBounds = (
     let tempMax = 0;
     let tempMin = 600;
 
-    attackItems.forEach(item => {
+    attackItems.forEach((item) => {
       if (item.startTime > tempMax) tempMax = item.startTime;
-      const endTime = item.startTime - item.allDelays[item.allDelays.length - 1];
+      const endTime =
+        item.startTime - item.allDelays[item.allDelays.length - 1];
       if (endTime < tempMin) tempMin = endTime;
     });
 
-    buffItems.forEach(item => {
+    buffItems.forEach((item) => {
       if (item.startTime > tempMax) tempMax = item.startTime;
       const isChecked = checkedUE2[item.character] || false;
-      const endTime = item.startTime - item.delay - item.duration * (isChecked ? defaultDurationMultiplier : 1);
+      const endTime =
+        item.startTime -
+        item.delay -
+        item.duration * (isChecked ? defaultDurationMultiplier : 1);
       if (endTime < tempMin) tempMin = endTime;
     });
 

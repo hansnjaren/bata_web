@@ -1,8 +1,8 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
-import { secToTimeString } from "../utils/time";
 import { defaultHeight } from "../constants/sizes";
 import { defaultDurationMultiplier } from "../constants/skills";
+import { secToTimeString } from "../utils/time";
 
 interface BuffSkillBlockProps {
   item: BuffSkill;
@@ -10,7 +10,6 @@ interface BuffSkillBlockProps {
   maxTime: number;
   minTime: number;
   widthMult: number;
-  heightMult: number;
   checkedUE2: Record<string, boolean>;
   index: number;
   isOpen: boolean;
@@ -25,7 +24,6 @@ export function BuffSkillBlock({
   maxTime,
   minTime,
   widthMult,
-  heightMult,
   checkedUE2,
   index,
   isOpen,
@@ -34,12 +32,19 @@ export function BuffSkillBlock({
   onClick,
 }: BuffSkillBlockProps) {
   const { startTime, delay, duration, character, detail } = item;
-  const id = skillTypes.findIndex(([char, det]) => char === character && det === detail);
-  const exactDuration = duration * (checkedUE2[character] ? defaultDurationMultiplier : 1);
+  const id = skillTypes.findIndex(
+    ([char, det]) => char === character && det === detail
+  );
+  const exactDuration =
+    duration * (checkedUE2[character] ? defaultDurationMultiplier : 1);
   const ref = useRef<HTMLDivElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
 
-  const [tooltipPos, setTooltipPos] = useState<{ top: number; left?: number; right?: number }>({ top: 0, left: 0 });
+  const [tooltipPos, setTooltipPos] = useState<{
+    top: number;
+    left?: number;
+    right?: number;
+  }>({ top: 0, left: 0 });
   const [tooltipDir, setTooltipDir] = useState<"right" | "left">("right");
 
   useEffect(() => {
@@ -70,11 +75,15 @@ export function BuffSkillBlock({
         ref={ref}
         style={{
           position: "absolute",
-          left: `${(widthMult * (maxTime - startTime) * 100) / (maxTime - minTime)}%`,
-          width: `${(widthMult * (delay + exactDuration) * 100) / (maxTime - minTime)}%`,
-          top: defaultHeight * heightMult * id,
-          height: defaultHeight * heightMult,
-          borderLeft: "1px solid black",
+          left: `${
+            (widthMult * (maxTime - startTime) * 100) / (maxTime - minTime)
+          }%`,
+          width: `${
+            (widthMult * (delay + exactDuration) * 100) / (maxTime - minTime)
+          }%`,
+          top: defaultHeight * id,
+          height: defaultHeight,
+          borderLeft: "1px solid red",
           cursor: "pointer",
         }}
         onMouseEnter={onHover}
@@ -91,7 +100,6 @@ export function BuffSkillBlock({
             height: "100%",
           }}
         >
-          {character} {detail}
           <div
             style={{
               position: "absolute",
@@ -134,7 +142,7 @@ export function BuffSkillBlock({
             <br />
             종료 시간: {secToTimeString(startTime - delay - duration)}
             <br />
-            지속시간: {duration.toFixed(2)}초
+            지속시간: {exactDuration.toFixed(2)}초
           </div>,
           document.body
         )}

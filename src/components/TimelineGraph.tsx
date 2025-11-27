@@ -1,27 +1,30 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { defaultHeight } from "../constants/sizes";
 import { useSkillTypes } from "../hooks/useSkillTypes";
 import { useTimeBounds } from "../hooks/useTimeBounds";
+import { secToTimeString } from "../utils/time";
 import { AttackSkillBlock } from "./AttackSkillBlock";
 import { BuffSkillBlock } from "./BuffSkillBlock";
-import { MultiplierInput } from "./MultiplierInput";
-import { defaultHeight } from "../constants/sizes";
 
 export default function TimelineGraph({
   attackItems,
   buffItems,
   checkedUE2,
+  widthMult,
+  timeZoneNum,
 }: {
   attackItems: any[];
   buffItems: any[];
   checkedUE2: Record<string, boolean>;
+  widthMult: number;
+  timeZoneNum: number;
 }) {
   const skillTypes = useSkillTypes(attackItems, buffItems);
-  const { maxTime, minTime } = useTimeBounds(attackItems, buffItems, checkedUE2);
-
-  const [widthMult, setWidthMult] = useState<number>(1);
-  const [widthMultInput, setWidthMultInput] = useState<string>("1");
-  const [heightMult, setHeightMult] = useState<number>(1);
-  const [heightMultInput, setHeightMultInput] = useState<string>("1");
+  const { maxTime, minTime } = useTimeBounds(
+    attackItems,
+    buffItems,
+    checkedUE2
+  );
 
   type OpenTooltip =
     | { type: "attack"; index: number }
@@ -30,32 +33,6 @@ export default function TimelineGraph({
 
   const [openTooltip, setOpenTooltip] = useState<OpenTooltip>(null);
   const [clickLock, setClickLock] = useState<OpenTooltip>(null);
-
-  const handleWidthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (value === "") {
-      setWidthMultInput("");
-      return;
-    }
-    const num = parseFloat(value);
-    if (!isNaN(num)) {
-      setWidthMultInput(num < 1 ? "1" : value);
-      setWidthMult(num < 1 ? 1 : num);
-    }
-  };
-
-  const handleHeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (value === "") {
-      setHeightMultInput("");
-      return;
-    }
-    const num = parseFloat(value);
-    if (!isNaN(num)) {
-      setHeightMultInput(num < 1 ? "1" : value);
-      setHeightMult(num < 1 ? 1 : num);
-    }
-  };
 
   useEffect(() => {
     if (clickLock === null) return;
@@ -96,11 +73,108 @@ export default function TimelineGraph({
     }
   };
 
+  const [scrollLeftPx, setScrollLeftPx] = useState(0);
+  const [viewportWidthPx, setViewportWidthPx] = useState(0);
+  const [viewportTopPx, setViewportTopPx] = useState(0);
+  const [viewportLeftPx, setViewportLeftPx] = useState(0);
+
+  React.useEffect(() => {
+    const element = document.getElementById("timelineView");
+    if (!element) return;
+
+    const updateRect = () => {
+      const rect = element.getBoundingClientRect();
+      setViewportWidthPx(rect.width);
+      setViewportTopPx(rect.top);
+      setViewportLeftPx(rect.left);
+    };
+    updateRect();
+
+    const onScroll = () => {
+      setScrollLeftPx(element.scrollLeft);
+    };
+
+    const onResize = () => {
+      updateRect();
+    };
+
+    element.addEventListener("scroll", onScroll);
+    window.addEventListener("resize", onResize);
+
+    return () => {
+      element.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onResize);
+    };
+  }, [attackItems, buffItems]);
+
   return (
     <div>
       <h3>시각화 블럭</h3>
       <div style={{ padding: 10 }}>
         <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            width: "100%",
+            borderBottom: "1px solid black",
+          }}
+        >
+          <div style={{ display: "inline-block" }}>
+            {" "}
+            {secToTimeString(
+              maxTime -
+                ((maxTime - minTime) * scrollLeftPx) /
+                  (viewportWidthPx * widthMult)
+            )}{" "}
+          </div>
+          <div style={{ display: "inline-block" }}>
+            {" "}
+            {secToTimeString(
+              maxTime -
+                ((maxTime - minTime) * (scrollLeftPx + viewportWidthPx)) /
+                  (viewportWidthPx * widthMult)
+            )}{" "}
+          </div>
+          {Array.from({ length: timeZoneNum - 1 }).map((_, i) => {
+            const ratio = (i + 1) / timeZoneNum;
+            const time =
+              maxTime -
+              ((maxTime - minTime) * (scrollLeftPx + viewportWidthPx * ratio)) /
+                (viewportWidthPx * widthMult);
+            return (
+              <div
+                key={i}
+                style={{
+                  position: "absolute",
+                  left: `${ratio * 100}%`,
+                  transform: "translateX(-50%)",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {secToTimeString(time)}
+              </div>
+            );
+          })}
+        </div>
+        <div>
+          {Array.from({ length: timeZoneNum + 1 }).map((_, i) => {
+            return (
+              <div
+                style={{
+                  position: "absolute",
+                  top: ``,
+                  width: `${(viewportWidthPx * i) / timeZoneNum}px`,
+                  height: `${defaultHeight * skillTypes.length}px`,
+                  borderRight: "1px solid gray",
+                  zIndex: -2,
+                }}
+              ></div>
+            );
+          })}
+        </div>
+
+        <div
+          id="timelineView"
           style={{
             position: "relative",
             width: "100%",
@@ -109,20 +183,7 @@ export default function TimelineGraph({
             overflow: "auto",
           }}
         >
-          {skillTypes.map((item, i) => (
-            <div
-              key={i}
-              style={{
-                width: `${100 * widthMult}%`,
-                height: `${defaultHeight * heightMult}px`,
-                boxSizing: "border-box",
-                backgroundColor: "#00ff0033",
-              }}
-            >
-              ID: {i}, 스킬 종류: {item[0]} {item[1]}
-            </div>
-          ))}
-
+          <div style={{ width: `${100 * widthMult}%` }}></div>
           {attackItems.map((item, i) => (
             <AttackSkillBlock
               key={i}
@@ -131,7 +192,6 @@ export default function TimelineGraph({
               maxTime={maxTime}
               minTime={minTime}
               widthMult={widthMult}
-              heightMult={heightMult}
               index={i}
               isOpen={openTooltip?.type === "attack" && openTooltip.index === i}
               onHover={() => handleHover("attack", i)}
@@ -148,7 +208,6 @@ export default function TimelineGraph({
               maxTime={maxTime}
               minTime={minTime}
               widthMult={widthMult}
-              heightMult={heightMult}
               checkedUE2={checkedUE2}
               index={i}
               isOpen={openTooltip?.type === "buff" && openTooltip.index === i}
@@ -158,17 +217,25 @@ export default function TimelineGraph({
             />
           ))}
         </div>
-      </div>
 
-      <h3>가로/세로 배율</h3>
-      <div>
-        <MultiplierInput labelText="Width Multiplier" value={widthMultInput} onChange={handleWidthChange} />
+        {skillTypes.map((item, i) => (
+          <div
+            key={i}
+            style={{
+              position: "absolute",
+              top: `${viewportTopPx + defaultHeight * i}px`,
+              left: `${viewportLeftPx}px`,
+              width: `${viewportWidthPx}px`,
+              height: `${defaultHeight}px`,
+              boxSizing: "border-box",
+              borderBottom: "1px solid black",
+              zIndex: -2,
+            }}
+          >
+            {item[0]} {item[1]}
+          </div>
+        ))}
       </div>
-      <div>
-        <MultiplierInput labelText="Height Multiplier" value={heightMultInput} onChange={handleHeightChange} />
-      </div>
-      <div>현재 Width Multiplier: {widthMult}</div>
-      <div>현재 Height Multiplier: {heightMult}</div>
     </div>
   );
 }

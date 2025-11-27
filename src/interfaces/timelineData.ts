@@ -7,19 +7,19 @@ interface Skill {
 }
 
 interface AttackSkill {
-    startTime: number;
-    character: string;
-    detail: string;
-    allDelays: number[];
+  startTime: number;
+  character: string;
+  detail: string;
+  allDelays: number[];
 }
 
 interface BuffSkill {
-    startTime: number;
-    delay: number;
-    duration: number;
-    character: string;
-    detail: string;
-    UE2: boolean;
+  startTime: number;
+  delay: number;
+  duration: number;
+  character: string;
+  detail: string;
+  UE2: boolean;
 }
 
 interface Character {
@@ -39,8 +39,11 @@ interface ParseResult {
 }
 
 interface TimelineProps {
-  parsedData: ParseResult[] | null;
-  sentAttackItems?: AttackSkill[]; 
-  sentBuffItems?: BuffSkill[]; 
+  parsedData?: ParseResult[] | null;
+  sentFilteredCharacterNames?: string[];
+  sentAttackItems?: AttackSkill[];
+  sentBuffItems?: BuffSkill[];
   sentCheckedUE2?: Record<string, boolean>;
+  sentWidthMult?: number;
+  sentTimeZoneNum?: number;
 }

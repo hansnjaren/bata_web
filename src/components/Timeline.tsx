@@ -1,25 +1,38 @@
 import React, { useEffect, useState } from "react";
-import TimelineGraph from "./TimelineGraph";
 import { useLocation, useNavigate } from "react-router-dom";
+import { timeZoneNumMin, widthMultMin } from "../constants/sizes";
 import { timeStringToSec } from "../utils/time";
+import { MultiplierInput } from "./MultiplierInput";
+import TimelineGraph from "./TimelineGraph";
 
-function GoToButtonWithData({ 
-  children, 
-  route, 
-  parsedData, 
-  attackItems, 
-  buffItems, 
-  checkedUE2 
-} : { 
-  children?: React.ReactNode, 
-  route: string, 
-  parsedData: ParseResult[], 
-  attackItems: AttackSkill[], 
-  buffItems: BuffSkill[], 
-  checkedUE2: Record<string, boolean>
+function GoToButtonWithData({
+  children,
+  route,
+  filteredCharacterNames,
+  attackItems,
+  buffItems,
+  checkedUE2,
+  widthMult,
+  timeZoneNum,
+}: {
+  children?: React.ReactNode;
+  route: string;
+  filteredCharacterNames: string[];
+  attackItems: AttackSkill[];
+  buffItems: BuffSkill[];
+  checkedUE2: Record<string, boolean>;
+  widthMult: number;
+  timeZoneNum: number;
 }) {
   const navigate = useNavigate();
-  const data = { parsedData, attackItems, buffItems, checkedUE2 };
+  const data = {
+    filteredCharacterNames,
+    attackItems,
+    buffItems,
+    checkedUE2,
+    widthMult,
+    timeZoneNum,
+  };
 
   const goToParser = () => {
     navigate(route, { state: data });
@@ -55,7 +68,15 @@ function findCanonicalNameAndSkill(
   return { name: char.name, skill };
 }
 
-export default function Timeline({ parsedData, sentAttackItems, sentBuffItems, sentCheckedUE2 }: TimelineProps) {
+export default function Timeline({
+  parsedData,
+  sentFilteredCharacterNames,
+  sentAttackItems,
+  sentBuffItems,
+  sentCheckedUE2,
+  sentWidthMult,
+  sentTimeZoneNum,
+}: TimelineProps) {
   const [characters, setCharacters] = useState<Character[]>([]);
   const [enemies, setEnemies] = useState<Enemy>([]);
   const location = useLocation();
@@ -82,9 +103,9 @@ export default function Timeline({ parsedData, sentAttackItems, sentBuffItems, s
     fetchData();
   }, []);
 
-  const attackItems: AttackSkill[] =
-    sentAttackItems ? sentAttackItems : 
-      parsedData?.flatMap(({ time, character, type, target }) => {
+  const attackItems: AttackSkill[] = sentAttackItems
+    ? sentAttackItems
+    : parsedData?.flatMap(({ time, character, type, target }) => {
         // 캐릭터+type에서 공격용 스킬 찾기
         const result = findCanonicalNameAndSkill(
           character,
@@ -106,9 +127,9 @@ export default function Timeline({ parsedData, sentAttackItems, sentBuffItems, s
         ];
       }) || [];
 
-  const buffItems: BuffSkill[] =
-    sentBuffItems ? sentBuffItems : 
-      parsedData?.flatMap(({ time, character, type, target }) => {
+  const buffItems: BuffSkill[] = sentBuffItems
+    ? sentBuffItems
+    : parsedData?.flatMap(({ time, character, type, target }) => {
         const result = findCanonicalNameAndSkill(
           character,
           type,
@@ -126,7 +147,8 @@ export default function Timeline({ parsedData, sentAttackItems, sentBuffItems, s
             (c) => c.name === target || c.alias.includes(target)
           );
           validTarget = !!(
-            targetChar && targetChar.skills.some((s) => s.role.includes("attack"))
+            targetChar &&
+            targetChar.skills.some((s) => s.role.includes("attack"))
           );
         }
         if (!validTarget) return [];
@@ -149,9 +171,9 @@ export default function Timeline({ parsedData, sentAttackItems, sentBuffItems, s
 
   const characterNames = [...characters.map((c) => c.name)];
 
-  const filteredCharacters = characterNames.filter((name) =>
-    usedCharacters.includes(name)
-  );
+  const filteredCharacters = sentFilteredCharacterNames
+    ? sentFilteredCharacterNames
+    : characterNames.filter((name) => usedCharacters.includes(name));
 
   const [checkedUE2, setCheckedUE2] = React.useState<Record<string, boolean>>(
     sentCheckedUE2 ? sentCheckedUE2 : {}
@@ -161,10 +183,72 @@ export default function Timeline({ parsedData, sentAttackItems, sentBuffItems, s
     setCheckedUE2((prev) => ({ ...prev, [name]: !prev[name] }));
   };
 
+  const defaultWidthMult = sentWidthMult ? sentWidthMult : widthMultMin;
+  const defaultTimeZoneNum = sentTimeZoneNum ? sentTimeZoneNum : timeZoneNumMin;
+
+  const [widthMult, setWidthMult] = useState<number>(defaultWidthMult);
+  const [widthMultInput, setWidthMultInput] = useState<string>(
+    `${defaultWidthMult}`
+  );
+  const [timeZoneNum, setTimeZoneNum] = useState<number>(defaultTimeZoneNum);
+  const [timeZoneNumInput, setTimeZoneNumInput] = useState<string>(
+    `${defaultTimeZoneNum}`
+  );
+
+  const handleWidthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value === "") {
+      setWidthMultInput("");
+      return;
+    }
+    const num = parseFloat(value);
+    if (!isNaN(num)) {
+      setWidthMultInput(num < widthMultMin ? `${widthMultMin}` : value);
+      setWidthMult(num < widthMultMin ? widthMultMin : num);
+    }
+  };
+
+  const handleTimeZoneNumChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value === "") {
+      setTimeZoneNumInput("");
+      return;
+    }
+    const num = parseFloat(value);
+    if (!isNaN(num)) {
+      setTimeZoneNumInput(num < timeZoneNumMin ? `${timeZoneNumMin}` : value);
+      setTimeZoneNum(num < timeZoneNumMin ? timeZoneNumMin : num);
+    }
+  };
+
   return (
     <div>
+      <TimelineGraph
+        attackItems={attackItems}
+        buffItems={buffItems}
+        checkedUE2={checkedUE2}
+        widthMult={widthMult}
+        timeZoneNum={timeZoneNum}
+      ></TimelineGraph>
 
-      <TimelineGraph attackItems={attackItems} buffItems={buffItems} checkedUE2={checkedUE2}></TimelineGraph>
+      <div>
+        <MultiplierInput
+          labelText="가로/세로 배율"
+          step="0.1"
+          value={widthMultInput}
+          onChange={handleWidthChange}
+          min={`${widthMultMin}`}
+        />
+      </div>
+      <div>
+        <MultiplierInput
+          labelText="중간 구간 개수"
+          step="1"
+          value={timeZoneNumInput}
+          onChange={handleTimeZoneNumChange}
+          min={`${timeZoneNumMin}`}
+        />
+      </div>
 
       <h3>캐릭터 리스트</h3>
       {filteredCharacters.map((name) => {
@@ -191,16 +275,19 @@ export default function Timeline({ parsedData, sentAttackItems, sentBuffItems, s
           </div>
         );
       })}
-      {
-        location.pathname === '/parseTimeline' && 
-        <GoToButtonWithData 
-          route='/tacticEditor' 
-          parsedData={parsedData ? parsedData : []} 
-          attackItems={attackItems} 
-          buffItems={buffItems} 
+      {location.pathname === "/parseTimeline" && (
+        <GoToButtonWithData
+          route="/tacticEditor"
+          filteredCharacterNames={filteredCharacters}
+          attackItems={attackItems}
+          buffItems={buffItems}
           checkedUE2={checkedUE2}
-        >Go to tactic editor with this data</GoToButtonWithData>
-      }
+          widthMult={widthMult}
+          timeZoneNum={timeZoneNum}
+        >
+          Go to tactic editor with this data
+        </GoToButtonWithData>
+      )}
     </div>
   );
 }
