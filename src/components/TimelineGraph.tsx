@@ -73,6 +73,7 @@ export default function TimelineGraph({
     }
   };
 
+  const [scrollDownPx, setScrollDownPx] = useState(0);
   const [scrollLeftPx, setScrollLeftPx] = useState(0);
   const [viewportWidthPx, setViewportWidthPx] = useState(0);
   const [viewportTopPx, setViewportTopPx] = useState(0);
@@ -90,22 +91,27 @@ export default function TimelineGraph({
     };
     updateRect();
 
-    const onScroll = () => {
+    const onElementScroll = () => {
       setScrollLeftPx(element.scrollLeft);
     };
+
+    const onDocumentScroll = () => {
+      setScrollDownPx(window.scrollY);
+    }
 
     const onResize = () => {
       updateRect();
     };
 
-    element.addEventListener("scroll", onScroll);
+    element.addEventListener("scroll", onElementScroll);
     window.addEventListener("resize", onResize);
-
+    window.addEventListener("scroll", onDocumentScroll);
     return () => {
-      element.removeEventListener("scroll", onScroll);
+      element.removeEventListener("scroll", onElementScroll);
       window.removeEventListener("resize", onResize);
+      window.removeEventListener("scroll", onDocumentScroll);
     };
-  }, [attackItems, buffItems]);
+  }, [attackItems, buffItems, window.scrollY]);
 
   return (
     <div>
@@ -223,7 +229,7 @@ export default function TimelineGraph({
             key={i}
             style={{
               position: "absolute",
-              top: `${viewportTopPx + defaultHeight * i}px`,
+              top: `${scrollDownPx + viewportTopPx + defaultHeight * i}px`,
               left: `${viewportLeftPx}px`,
               width: `${viewportWidthPx}px`,
               height: `${defaultHeight}px`,
@@ -235,6 +241,9 @@ export default function TimelineGraph({
             {item[0]} {item[1]}
           </div>
         ))}
+
+        <div>scrollDownPx: {scrollDownPx}, viewportTopPx: {viewportTopPx}</div>
+        <div>window.ScrollY: {window.scrollY}</div>
       </div>
     </div>
   );
