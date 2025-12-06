@@ -241,9 +241,6 @@ export default function TimelineGraph({
             {item[0]} {item[1]}
           </div>
         ))}
-
-        <div>scrollDownPx: {scrollDownPx}, viewportTopPx: {viewportTopPx}</div>
-        <div>window.ScrollY: {window.scrollY}</div>
       </div>
     </div>
   );
