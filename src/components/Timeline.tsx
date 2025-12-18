@@ -173,7 +173,13 @@ export default function Timeline({
 
   const filteredCharacters = sentFilteredCharacterNames
     ? sentFilteredCharacterNames
-    : characterNames.filter((name) => usedCharacters.includes(name));
+    : characters
+        .filter(
+          (char) =>
+            usedCharacters.includes(char.name) ||
+            char.alias.some((name) => usedCharacters.includes(name))
+        )
+        .map((char) => char.name);
 
   const [checkedUE2, setCheckedUE2] = React.useState<Record<string, boolean>>(
     sentCheckedUE2 ? sentCheckedUE2 : {}
