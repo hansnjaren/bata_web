@@ -45,7 +45,7 @@ export const useTimeBounds = (
     });
 
     tempMax = Math.ceil(tempMax / 10) * 10;
-    tempMin = Math.floor(tempMin / 10) * 10;
+    tempMin = Math.max(Math.floor(tempMin / 10) * 10, 0);
     setMaxTime(tempMax);
     setMinTime(tempMin);
   }, [attackItems, buffItems, checkedUE2]);

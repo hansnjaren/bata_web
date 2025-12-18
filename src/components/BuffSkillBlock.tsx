@@ -140,7 +140,7 @@ export function BuffSkillBlock({
             <br />
             시작 시간: {secToTimeString(startTime - delay)}
             <br />
-            종료 시간: {secToTimeString(startTime - delay - duration)}
+            종료 시간: {secToTimeString(startTime - delay - exactDuration)}
             <br />
             지속시간: {exactDuration.toFixed(2)}초
           </div>,
