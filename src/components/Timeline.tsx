@@ -139,11 +139,12 @@ export default function Timeline({
         if (!result) return [];
         // 조건: target이 null이거나 target이 attack 역할 스킬을 갖는 캐릭터일 때만 추가
         let validTarget = false;
+        let targetChar: Character | undefined = undefined;
         if (target === null) {
           validTarget = true;
         } else {
           // target이 공(격) 타입 스킬 가진 캐릭터면 통과
-          const targetChar = characters.find(
+          targetChar = characters.find(
             (c) => c.name === target || c.alias.includes(target)
           );
           validTarget = !!(
@@ -159,7 +160,7 @@ export default function Timeline({
             delay: result.skill.delays[0] || 0,
             duration: result.skill.duration,
             character: result.name,
-            detail: target,
+            detail: targetChar?.name || "",
             UE2: characters.find((c) => c.name === result.name)?.UE2 ?? false,
           },
         ];
