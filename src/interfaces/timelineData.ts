@@ -9,7 +9,7 @@ interface Skill {
 interface AttackSkill {
   startTime: number;
   character: string;
-  detail: string;
+  detail: string | null;
   allDelays: number[];
 }
 
@@ -18,7 +18,7 @@ interface BuffSkill {
   delay: number;
   duration: number;
   character: string;
-  detail: string;
+  detail: string | null;
   UE2: boolean;
 }
 

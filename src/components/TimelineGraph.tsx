@@ -238,7 +238,7 @@ export default function TimelineGraph({
               zIndex: -2,
             }}
           >
-            {item[0]} {item[1]}
+            {item[0]}{item[1] && `>${item[1]}`}
           </div>
         ))}
       </div>
