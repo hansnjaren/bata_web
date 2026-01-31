@@ -23,7 +23,7 @@ export default function TimelineGraph({
   const { maxTime, minTime } = useTimeBounds(
     attackItems,
     buffItems,
-    checkedUE2
+    checkedUE2,
   );
 
   type OpenTooltip =
@@ -97,7 +97,7 @@ export default function TimelineGraph({
 
     const onDocumentScroll = () => {
       setScrollDownPx(window.scrollY);
-    }
+    };
 
     const onResize = () => {
       updateRect();
@@ -130,7 +130,7 @@ export default function TimelineGraph({
             {secToTimeString(
               maxTime -
                 ((maxTime - minTime) * scrollLeftPx) /
-                  (viewportWidthPx * widthMult)
+                  (viewportWidthPx * widthMult),
             )}{" "}
           </div>
           <div style={{ display: "inline-block" }}>
@@ -138,7 +138,7 @@ export default function TimelineGraph({
             {secToTimeString(
               maxTime -
                 ((maxTime - minTime) * (scrollLeftPx + viewportWidthPx)) /
-                  (viewportWidthPx * widthMult)
+                  (viewportWidthPx * widthMult),
             )}{" "}
           </div>
           {Array.from({ length: timeZoneNum - 1 }).map((_, i) => {
@@ -238,7 +238,8 @@ export default function TimelineGraph({
               zIndex: -2,
             }}
           >
-            {item[0]}{item[1] && `>${item[1]}`}
+            {item[0]}
+            {item[1] && `>${item[1]}`}
           </div>
         ))}
       </div>

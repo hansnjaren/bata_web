@@ -30,7 +30,7 @@ export function AttackSkillBlock({
 }: AttackSkillBlockProps) {
   const { startTime, character, detail, allDelays } = item;
   const id = skillTypes.findIndex(
-    ([char, det]) => char === character && det === detail
+    ([char, det]) => char === character && det === detail,
   );
   const ref = useRef<HTMLDivElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
@@ -138,7 +138,7 @@ export function AttackSkillBlock({
             모든 타수 시점:{" "}
             {allDelays.map((d) => secToTimeString(startTime - d)).join(", ")}
           </div>,
-          document.body
+          document.body,
         )}
     </>
   );

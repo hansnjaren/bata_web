@@ -33,7 +33,7 @@ export function BuffSkillBlock({
 }: BuffSkillBlockProps) {
   const { startTime, delay, duration, character, detail } = item;
   const id = skillTypes.findIndex(
-    ([char, det]) => char === character && det === detail
+    ([char, det]) => char === character && det === detail,
   );
   const exactDuration =
     duration * (checkedUE2[character] ? defaultDurationMultiplier : 1);
@@ -144,7 +144,7 @@ export function BuffSkillBlock({
             <br />
             지속시간: {exactDuration.toFixed(2)}초
           </div>,
-          document.body
+          document.body,
         )}
     </>
   );

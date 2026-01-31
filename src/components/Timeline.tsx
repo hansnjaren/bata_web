@@ -48,11 +48,11 @@ function findCanonicalNameAndSkill(
   character: string, // 입력 or 파싱된 이름
   type: string | null, // 입력된 스킬 타입(ON/1타/2스 등)
   characters: Character[],
-  role: Role
+  role: Role,
 ): { name: string; skill: Skill } | null {
   // step1: 캐릭터 객체 찾기 (name/alias 둘 다 확인)
   const char = characters.find(
-    (ch) => ch.name === character || ch.alias.includes(character)
+    (ch) => ch.name === character || ch.alias.includes(character),
   );
   if (!char) return null;
 
@@ -62,7 +62,7 @@ function findCanonicalNameAndSkill(
   const skill = char.skills.find(
     (sk) =>
       (sk.type === skillType || sk.alias.includes(skillType)) &&
-      sk.role.includes(role)
+      sk.role.includes(role),
   );
   if (!skill) return null;
   return { name: char.name, skill };
@@ -111,7 +111,7 @@ export default function Timeline({
           character,
           type,
           characters,
-          "attack"
+          "attack",
         );
         if (!result) return [];
         // 조건: target이 null이거나 enemies 목록에 있어야 함
@@ -134,7 +134,7 @@ export default function Timeline({
           character,
           type,
           characters,
-          "support"
+          "support",
         );
         if (!result) return [];
         // 조건: target이 null이거나 target이 attack 역할 스킬을 갖는 캐릭터일 때만 추가
@@ -145,7 +145,7 @@ export default function Timeline({
         } else {
           // target이 공(격) 타입 스킬 가진 캐릭터면 통과
           targetChar = characters.find(
-            (c) => c.name === target || c.alias.includes(target)
+            (c) => c.name === target || c.alias.includes(target),
           );
           validTarget = !!(
             targetChar &&
@@ -178,12 +178,12 @@ export default function Timeline({
         .filter(
           (char) =>
             usedCharacters.includes(char.name) ||
-            char.alias.some((name) => usedCharacters.includes(name))
+            char.alias.some((name) => usedCharacters.includes(name)),
         )
         .map((char) => char.name);
 
   const [checkedUE2, setCheckedUE2] = React.useState<Record<string, boolean>>(
-    sentCheckedUE2 ? sentCheckedUE2 : {}
+    sentCheckedUE2 ? sentCheckedUE2 : {},
   );
 
   const handleCheckboxChange = (name: string) => {
@@ -195,11 +195,11 @@ export default function Timeline({
 
   const [widthMult, setWidthMult] = useState<number>(defaultWidthMult);
   const [widthMultInput, setWidthMultInput] = useState<string>(
-    `${defaultWidthMult}`
+    `${defaultWidthMult}`,
   );
   const [timeZoneNum, setTimeZoneNum] = useState<number>(defaultTimeZoneNum);
   const [timeZoneNumInput, setTimeZoneNumInput] = useState<string>(
-    `${defaultTimeZoneNum}`
+    `${defaultTimeZoneNum}`,
   );
 
   const handleWidthChange = (e: React.ChangeEvent<HTMLInputElement>) => {

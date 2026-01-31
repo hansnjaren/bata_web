@@ -4,7 +4,7 @@ type SkillItem = { character: string; detail: string };
 
 export const useSkillTypes = (
   attackItems: SkillItem[],
-  buffItems: SkillItem[]
+  buffItems: SkillItem[],
 ) => {
   const [skillTypes, setSkillTypes] = useState<Array<[string, string]>>([]);
 

@@ -18,7 +18,7 @@ type BuffSkill = {
 export const useTimeBounds = (
   attackItems: AttackSkill[],
   buffItems: BuffSkill[],
-  checkedUE2: Record<string, boolean>
+  checkedUE2: Record<string, boolean>,
 ) => {
   const [maxTime, setMaxTime] = useState<number>(600);
   const [minTime, setMinTime] = useState<number>(0);

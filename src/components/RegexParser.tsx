@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
 
 const pattern =
-  /\(?(\d{2}:\d{2}\.\d{3})\)?\s*C?([^\s>]+)(?:\s*(ON|\d타|\d스))?(?:>([^\s]+))?/g;
+  /\(?(\d{2}:\d{2}\.\d{3})\)?\s*C?([^\s>]+)(?:\s*(ON|OFF|\d타|\d스))?(?:>([^\s]+))?/g;
 
 type ParseResult = {
   time: string;
@@ -31,7 +31,7 @@ export default function RegexParser({ onParse }: RegexParserProps) {
       setParseResults(
         matches.length > 0
           ? JSON.stringify(matches, null, 2)
-          : "No matches found"
+          : "No matches found",
       );
     } else {
       onParse(null);
