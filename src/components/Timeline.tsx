@@ -170,8 +170,6 @@ export default function Timeline({
     ? Array.from(new Set(parsedData.map((item) => item.character)))
     : [];
 
-  const characterNames = [...characters.map((c) => c.name)];
-
   const filteredCharacters = sentFilteredCharacterNames
     ? sentFilteredCharacterNames
     : characters
