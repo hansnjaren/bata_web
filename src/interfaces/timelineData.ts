@@ -6,6 +6,11 @@ interface Skill {
   duration: number;
 }
 
+interface SkillItem {
+  character: string;
+  detail: string | null;
+}
+
 interface AttackSkill {
   startTime: number;
   character: string;

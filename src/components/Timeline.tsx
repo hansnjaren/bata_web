@@ -143,14 +143,15 @@ export default function Timeline({
         if (target === null) {
           validTarget = true;
         } else {
-          // target이 공(격) 타입 스킬 가진 캐릭터면 통과
+          // target이 공(격) 타입 스킬 가진 캐릭터(버프)거나 적(디버프)이면 통과
           targetChar = characters.find(
             (c) => c.name === target || c.alias.includes(target),
           );
-          validTarget = !!(
-            targetChar &&
-            targetChar.skills.some((s) => s.role.includes("attack"))
-          );
+          validTarget =
+            !!(
+              targetChar &&
+              targetChar.skills.some((s) => s.role.includes("attack"))
+            ) || enemies.includes(target);
         }
         if (!validTarget) return [];
         const tSec = timeStringToSec(time);

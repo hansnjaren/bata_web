@@ -5,12 +5,12 @@ import { secToTimeString } from "../utils/time";
 
 interface AttackSkillBlockProps {
   item: AttackSkill;
-  skillTypes: Array<[string, string]>;
   maxTime: number;
   minTime: number;
   widthMult: number;
   index: number;
   isOpen: boolean;
+  totalItems: number;
   onHover: () => void;
   onLeave: () => void;
   onClick: () => void;
@@ -18,20 +18,17 @@ interface AttackSkillBlockProps {
 
 export function AttackSkillBlock({
   item,
-  skillTypes,
   maxTime,
   minTime,
   widthMult,
   index,
   isOpen,
+  totalItems,
   onHover,
   onLeave,
   onClick,
 }: AttackSkillBlockProps) {
-  const { startTime, character, detail, allDelays } = item;
-  const id = skillTypes.findIndex(
-    ([char, det]) => char === character && det === detail,
-  );
+  const { startTime, character, allDelays } = item;
   const ref = useRef<HTMLDivElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const [tooltipPos, setTooltipPos] = useState<{
@@ -76,7 +73,7 @@ export function AttackSkillBlock({
             (widthMult * allDelays[allDelays.length - 1] * 100) /
             (maxTime - minTime)
           }%`,
-          top: defaultHeight * id,
+          top: defaultHeight * index,
           height: defaultHeight,
           borderLeft: "1px solid black",
           backgroundColor: "#0000ff33",
@@ -101,9 +98,9 @@ export function AttackSkillBlock({
               key={i}
               style={{
                 position: "absolute",
-                top: -defaultHeight * id,
+                top: -defaultHeight * index,
                 width: `${(delay * 100) / allDelays[allDelays.length - 1]}%`,
-                height: defaultHeight * skillTypes.length,
+                height: defaultHeight * totalItems,
                 borderRight: "1px solid black",
                 zIndex: -1,
               }}

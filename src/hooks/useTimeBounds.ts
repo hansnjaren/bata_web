@@ -1,20 +1,6 @@
 import { useEffect, useState } from "react";
 import { defaultDurationMultiplier } from "../constants/skills";
 
-type AttackSkill = {
-  startTime: number;
-  allDelays: number[];
-  character: string;
-  detail: string;
-};
-type BuffSkill = {
-  startTime: number;
-  delay: number;
-  duration: number;
-  character: string;
-  detail: string;
-};
-
 export const useTimeBounds = (
   attackItems: AttackSkill[],
   buffItems: BuffSkill[],

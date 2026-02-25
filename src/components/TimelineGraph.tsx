@@ -13,8 +13,8 @@ export default function TimelineGraph({
   widthMult,
   timeZoneNum,
 }: {
-  attackItems: any[];
-  buffItems: any[];
+  attackItems: AttackSkill[];
+  buffItems: BuffSkill[];
   checkedUE2: Record<string, boolean>;
   widthMult: number;
   timeZoneNum: number;
@@ -75,8 +75,6 @@ export default function TimelineGraph({
 
   const [scrollLeftPx, setScrollLeftPx] = useState(0);
   const [viewportWidthPx, setViewportWidthPx] = useState(0);
-  const [viewportTopPx, setViewportTopPx] = useState(0);
-  const [viewportLeftPx, setViewportLeftPx] = useState(0);
 
   React.useEffect(() => {
     const element = document.getElementById("timelineView");
@@ -85,8 +83,6 @@ export default function TimelineGraph({
     const updateRect = () => {
       const rect = element.getBoundingClientRect();
       setViewportWidthPx(rect.width);
-      setViewportTopPx(rect.top);
-      setViewportLeftPx(rect.left);
     };
     updateRect();
 
@@ -182,17 +178,35 @@ export default function TimelineGraph({
             overflow: "auto",
           }}
         >
-          <div style={{ width: `${100 * widthMult}%` }}></div>
+          {skillTypes.map((item, i) => (
+            <div
+              key={i}
+              style={{
+                position: "absolute",
+                top: `${defaultHeight * i}px`,
+                height: `${defaultHeight}px`,
+                width: `${100 * widthMult}%`,
+                boxSizing: "border-box",
+                borderBottom: "1px solid black",
+                backgroundColor: "transparent",
+              }}
+            >
+              {item[0]}
+              {item[1] && `>${item[1]}`}
+            </div>
+          ))}
           {attackItems.map((item, i) => (
             <AttackSkillBlock
               key={i}
               item={item}
-              skillTypes={skillTypes}
               maxTime={maxTime}
               minTime={minTime}
               widthMult={widthMult}
-              index={i}
+              index={skillTypes.findIndex(
+                ([char, det]) => char === item.character && det === item.detail,
+              )}
               isOpen={openTooltip?.type === "attack" && openTooltip.index === i}
+              totalItems={skillTypes.length}
               onHover={() => handleHover("attack", i)}
               onLeave={() => handleLeave("attack", i)}
               onClick={() => handleClick("attack", i)}
@@ -203,12 +217,13 @@ export default function TimelineGraph({
             <BuffSkillBlock
               key={i}
               item={item}
-              skillTypes={skillTypes}
               maxTime={maxTime}
               minTime={minTime}
               widthMult={widthMult}
               checkedUE2={checkedUE2}
-              index={i}
+              index={skillTypes.findIndex(
+                ([char, det]) => char === item.character && det === item.detail,
+              )}
               isOpen={openTooltip?.type === "buff" && openTooltip.index === i}
               onHover={() => handleHover("buff", i)}
               onLeave={() => handleLeave("buff", i)}
@@ -216,25 +231,6 @@ export default function TimelineGraph({
             />
           ))}
         </div>
-
-        {skillTypes.map((item, i) => (
-          <div
-            key={i}
-            style={{
-              position: "absolute",
-              top: `${window.scrollY + viewportTopPx + defaultHeight * i}px`,
-              left: `${viewportLeftPx}px`,
-              width: `${viewportWidthPx}px`,
-              height: `${defaultHeight}px`,
-              boxSizing: "border-box",
-              borderBottom: "1px solid black",
-              zIndex: -2,
-            }}
-          >
-            {item[0]}
-            {item[1] && `>${item[1]}`}
-          </div>
-        ))}
       </div>
     </div>
   );

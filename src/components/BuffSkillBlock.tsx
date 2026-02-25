@@ -6,7 +6,6 @@ import { secToTimeString } from "../utils/time";
 
 interface BuffSkillBlockProps {
   item: BuffSkill;
-  skillTypes: Array<[string, string]>;
   maxTime: number;
   minTime: number;
   widthMult: number;
@@ -20,7 +19,6 @@ interface BuffSkillBlockProps {
 
 export function BuffSkillBlock({
   item,
-  skillTypes,
   maxTime,
   minTime,
   widthMult,
@@ -31,10 +29,7 @@ export function BuffSkillBlock({
   onLeave,
   onClick,
 }: BuffSkillBlockProps) {
-  const { startTime, delay, duration, character, detail } = item;
-  const id = skillTypes.findIndex(
-    ([char, det]) => char === character && det === detail,
-  );
+  const { startTime, delay, duration, character } = item;
   const exactDuration =
     duration * (checkedUE2[character] ? defaultDurationMultiplier : 1);
   const ref = useRef<HTMLDivElement>(null);
@@ -81,7 +76,7 @@ export function BuffSkillBlock({
           width: `${
             (widthMult * (delay + exactDuration) * 100) / (maxTime - minTime)
           }%`,
-          top: defaultHeight * id,
+          top: defaultHeight * index,
           height: defaultHeight,
           borderLeft: "1px solid red",
           cursor: "pointer",

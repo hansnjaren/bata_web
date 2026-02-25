@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
 
 const pattern =
-  /\(?(\d{2}:\d{2}\.\d{3})\)?\s*C?([^\s>]+)(?:\s*(ON|OFF|\d타|\d스))?(?:>([^\s]+))?/g;
+  /\(?(\d{2}:\d{2}\.\d{3})\)?(?:\s*(?:\([^)]*\)|\[[^\]]*\]))*\s*C?\**[\(\[]*([^\s*>()[\]]+)[\)\]]*\**(?:\s*(ON|OFF|\d타|\d스))?(?:\s*>\s*(?:\[([^\]]+)\](?:\([^)]+\))?|([^\n-]*))(?=\s*-|\n|$))?/g;
 
 type ParseResult = {
   time: string;
@@ -20,12 +20,14 @@ export default function RegexParser({ onParse }: RegexParserProps) {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   useEffect(() => {
-    if (input) {
-      const matches = Array.from(input.matchAll(pattern)).map((match) => ({
+    const cleaned = input.replace(/`[^`]*`/g, " ");
+
+    if (cleaned) {
+      const matches = Array.from(cleaned.matchAll(pattern)).map((match) => ({
         time: match[1],
         character: match[2],
         type: match[3] || null,
-        target: match[4] || null,
+        target: (match[4] ?? match[5])?.trim() || null,
       }));
       onParse(matches.length > 0 ? matches : null);
       setParseResults(

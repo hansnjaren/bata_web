@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
 
-type SkillItem = { character: string; detail: string };
-
 export const useSkillTypes = (
   attackItems: SkillItem[],
   buffItems: SkillItem[],
 ) => {
-  const [skillTypes, setSkillTypes] = useState<Array<[string, string]>>([]);
+  const [skillTypes, setSkillTypes] = useState<Array<[string, string | null]>>(
+    [],
+  );
 
   useEffect(() => {
     const combined = [...attackItems, ...buffItems];
     const uniqueSet = new Set<string>();
-    const newSkillTypes: [string, string][] = [];
+    const newSkillTypes: [string, string | null][] = [];
 
     combined.forEach((item) => {
       const key = `${item.character}-${item.detail}`;
