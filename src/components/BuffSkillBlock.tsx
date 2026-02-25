@@ -1,8 +1,8 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import { defaultHeight } from "../constants/sizes";
 import { defaultDurationMultiplier } from "../constants/skills";
-import { secToTimeString } from "../utils/time";
+import { parseNormalizeTimeNoSnap, secToTimeString } from "../utils/time";
 
 interface BuffSkillBlockProps {
   item: BuffSkill;
@@ -18,8 +18,11 @@ interface BuffSkillBlockProps {
 
   editable?: boolean;
   onDragStart?: () => void;
-  onDragMove?: (dxPx: number) => void; // 누적 dxPx
+  onDragMove?: (dxPx: number) => void;
   onDragEnd?: () => void;
+
+  onCommitStartTime: (newStartTimeSec: number) => void;
+  getResetDraftValue: () => string;
 }
 
 export function BuffSkillBlock({
@@ -37,6 +40,8 @@ export function BuffSkillBlock({
   onDragStart,
   onDragMove,
   onDragEnd,
+  onCommitStartTime,
+  getResetDraftValue,
 }: BuffSkillBlockProps) {
   const { startTime, delay, duration, character } = item;
 
@@ -45,16 +50,44 @@ export function BuffSkillBlock({
 
   const ref = useRef<HTMLDivElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const [tooltipPos, setTooltipPos] = useState<{
     top: number;
     left?: number;
     right?: number;
-  }>({ top: 0, left: 0 });
+  }>({
+    top: 0,
+    left: 0,
+  });
   const [tooltipDir, setTooltipDir] = useState<"right" | "left">("right");
 
-  // drag state
   const dragRef = useRef<null | { pointerId: number; startX: number }>(null);
+
+  // 입력(draft)
+  const [draftTime, setDraftTime] = useState<string>("");
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setDraftTime(secToTimeString(startTime));
+    queueMicrotask(() => inputRef.current?.focus());
+  }, [isOpen, startTime]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    return () => {
+      setDraftTime("");
+    };
+  }, [isOpen]);
+
+  const commit = () => {
+    const r = parseNormalizeTimeNoSnap(draftTime);
+    if (r == null) return;
+
+    // snap은 TimelineGraph에서만
+    onCommitStartTime(r.sec);
+    setDraftTime(r.normalized);
+  };
 
   useLayoutEffect(() => {
     if (isOpen && ref.current && tooltipRef.current) {
@@ -90,7 +123,7 @@ export function BuffSkillBlock({
           height: defaultHeight,
           borderLeft: "1px solid red",
           cursor: editable ? "ew-resize" : "pointer",
-          touchAction: editable ? "none" : "auto", // 터치 제스처로 인한 cancel 방지에 도움 [web:92]
+          touchAction: editable ? "none" : "auto",
         }}
         onMouseEnter={onHover}
         onMouseLeave={onLeave}
@@ -103,7 +136,7 @@ export function BuffSkillBlock({
           e.stopPropagation();
           if (e.pointerType === "mouse" && e.button !== 0) return;
 
-          (e.currentTarget as HTMLDivElement).setPointerCapture(e.pointerId); // [web:50]
+          (e.currentTarget as HTMLDivElement).setPointerCapture(e.pointerId);
           dragRef.current = { pointerId: e.pointerId, startX: e.clientX };
           onDragStart?.();
         }}
@@ -111,7 +144,6 @@ export function BuffSkillBlock({
           if (!editable) return;
           const s = dragRef.current;
           if (!s || s.pointerId !== e.pointerId) return;
-
           onDragMove?.(e.clientX - s.startX);
         }}
         onPointerUp={(e) => {
@@ -120,7 +152,6 @@ export function BuffSkillBlock({
           if (!s || s.pointerId !== e.pointerId) return;
 
           dragRef.current = null;
-          // pointerup에서 캡처는 자동 해제될 수 있지만, 명시적으로 호출해도 됨 [web:50]
           try {
             (e.currentTarget as HTMLDivElement).releasePointerCapture(
               e.pointerId,
@@ -134,7 +165,7 @@ export function BuffSkillBlock({
           if (!s || s.pointerId !== e.pointerId) return;
 
           dragRef.current = null;
-          onDragEnd?.(); // 브라우저가 스크롤/줌으로 전환하면 cancel 날 수 있음 [web:138]
+          onDragEnd?.();
         }}
       >
         <div style={{ position: "relative", width: "100%", height: "100%" }}>
@@ -170,11 +201,42 @@ export function BuffSkillBlock({
               maxWidth: "33vw",
               wordBreak: "break-word",
             }}
+            onMouseDown={(e) => e.stopPropagation()}
+            onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => e.stopPropagation()}
           >
             스킬 사용 캐릭터: {character}
             <br />
-            스킬 사용 시간: {secToTimeString(startTime)}
+            스킬 사용 시간:{" "}
+            <input
+              ref={inputRef}
+              value={draftTime}
+              inputMode="decimal"
+              onChange={(e) => {
+                const filtered = e.target.value.replace(/[^\d:.\-+]/g, "");
+                setDraftTime(filtered);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  commit();
+                } else if (e.key === "Escape") {
+                  e.preventDefault();
+                  setDraftTime(getResetDraftValue());
+                }
+              }}
+              style={{ width: 140, fontFamily: "monospace" }}
+              placeholder="(m:)s(.0)"
+            />
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                commit();
+              }}
+            >
+              적용
+            </button>
             <br />
             시작 시간: {secToTimeString(startTime - delay)}
             <br />

@@ -1,7 +1,7 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import { defaultHeight } from "../constants/sizes";
-import { secToTimeString } from "../utils/time";
+import { parseNormalizeTimeNoSnap, secToTimeString } from "../utils/time";
 
 interface AttackSkillBlockProps {
   item: AttackSkill;
@@ -17,8 +17,11 @@ interface AttackSkillBlockProps {
 
   editable?: boolean;
   onDragStart?: () => void;
-  onDragMove?: (dxPx: number) => void; // 누적 dxPx
+  onDragMove?: (dxPx: number) => void;
   onDragEnd?: () => void;
+
+  onCommitStartTime: (newStartTimeSec: number) => void;
+  getResetDraftValue: () => string;
 }
 
 export function AttackSkillBlock({
@@ -36,20 +39,53 @@ export function AttackSkillBlock({
   onDragStart,
   onDragMove,
   onDragEnd,
+  onCommitStartTime,
+  getResetDraftValue,
 }: AttackSkillBlockProps) {
   const { startTime, character, allDelays } = item;
 
   const ref = useRef<HTMLDivElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const [tooltipPos, setTooltipPos] = useState<{
     top: number;
     left?: number;
     right?: number;
-  }>({ top: 0, left: 0 });
+  }>({
+    top: 0,
+    left: 0,
+  });
   const [tooltipDir, setTooltipDir] = useState<"right" | "left">("right");
 
   const dragRef = useRef<null | { pointerId: number; startX: number }>(null);
+
+  // 시간 입력(draft)
+  const [draftTime, setDraftTime] = useState<string>("");
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setDraftTime(secToTimeString(startTime));
+    queueMicrotask(() => inputRef.current?.focus());
+  }, [isOpen, startTime]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    return () => {
+      setDraftTime("");
+    };
+  }, [isOpen]);
+
+  const commit = () => {
+    const r = parseNormalizeTimeNoSnap(draftTime);
+    if (r == null) return;
+
+    // snap은 TimelineGraph에서만
+    onCommitStartTime(r.sec);
+
+    // 입력창은 정규화된 mm:ss.000로 교체(스냅 전 값이므로 프레임 정렬은 TG가 책임)
+    setDraftTime(r.normalized);
+  };
 
   useLayoutEffect(() => {
     if (isOpen && ref.current && tooltipRef.current) {
@@ -86,7 +122,7 @@ export function AttackSkillBlock({
           borderLeft: "1px solid black",
           backgroundColor: "#0000ff33",
           cursor: editable ? "ew-resize" : "pointer",
-          touchAction: editable ? "none" : "auto", // 기본 터치 동작 비활성화 [web:92]
+          touchAction: editable ? "none" : "auto",
         }}
         onMouseEnter={onHover}
         onMouseLeave={onLeave}
@@ -100,7 +136,7 @@ export function AttackSkillBlock({
 
           if (e.pointerType === "mouse" && e.button !== 0) return;
 
-          (e.currentTarget as HTMLDivElement).setPointerCapture(e.pointerId); // [web:50]
+          (e.currentTarget as HTMLDivElement).setPointerCapture(e.pointerId);
           dragRef.current = { pointerId: e.pointerId, startX: e.clientX };
           onDragStart?.();
         }}
@@ -119,7 +155,6 @@ export function AttackSkillBlock({
 
           dragRef.current = null;
 
-          // pointerup 때 캡처는 암시적으로도 해제될 수 있지만, 명시적으로 해도 됨 [web:50][web:91]
           try {
             (e.currentTarget as HTMLDivElement).releasePointerCapture(
               e.pointerId,
@@ -169,11 +204,42 @@ export function AttackSkillBlock({
               maxWidth: "33vw",
               wordBreak: "break-word",
             }}
+            onMouseDown={(e) => e.stopPropagation()}
+            onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => e.stopPropagation()}
           >
             스킬 사용 캐릭터: {character}
             <br />
-            스킬 사용 시간: {secToTimeString(startTime)}
+            스킬 사용 시간:{" "}
+            <input
+              ref={inputRef}
+              value={draftTime}
+              inputMode="decimal"
+              onChange={(e) => {
+                const filtered = e.target.value.replace(/[^\d:.\-+]/g, "");
+                setDraftTime(filtered);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  commit();
+                } else if (e.key === "Escape") {
+                  e.preventDefault();
+                  setDraftTime(getResetDraftValue());
+                }
+              }}
+              style={{ width: 140, fontFamily: "monospace" }}
+              placeholder="(m:)s(.0)"
+            />
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                commit();
+              }}
+            >
+              적용
+            </button>
             <br />
             모든 타수 시점:{" "}
             {allDelays.map((d) => secToTimeString(startTime - d)).join(", ")}

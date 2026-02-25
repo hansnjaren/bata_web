@@ -18,7 +18,7 @@ export default function TimelineGraph({
   checkedUE2,
   widthMult,
   timeZoneNum,
-  editable, // 추가: 이 route에서만 true로 넘겨
+  editable,
 }: {
   attackItems: AttackSkill[];
   buffItems: BuffSkill[];
@@ -41,7 +41,6 @@ export default function TimelineGraph({
     setBuff(buffItems.map((it) => ({ ...it })));
   };
 
-  // 2) 타임/라인 계산은 "현재 state" 기준으로
   const skillTypes = useSkillTypes(attack, buff);
   const { maxTime, minTime } = useTimeBounds(attack, buff, checkedUE2);
 
@@ -98,40 +97,6 @@ export default function TimelineGraph({
     dragBaseRef.current[id] = base;
   };
 
-  const handleDragMove = (type: ItemType, index: number, dxPx: number) => {
-    if (!editable) return;
-    if (pxPerSec <= 0) return;
-
-    const id = dragKeyToId(type, index);
-    const base = dragBaseRef.current[id];
-    if (base === undefined) return;
-
-    const deltaSec = -dxPx / pxPerSec;
-    const snapped = snapToFrame(base + deltaSec);
-    const clamped = clamp(snapped, minTime, maxTime);
-
-    if (type === "attack") {
-      setAttack((prev) => {
-        if (!prev[index]) return prev;
-        const next = [...prev];
-        next[index] = { ...next[index], startTime: clamped };
-        return next;
-      });
-    } else {
-      setBuff((prev) => {
-        if (!prev[index]) return prev;
-        const next = [...prev];
-        next[index] = { ...next[index], startTime: clamped };
-        return next;
-      });
-    }
-  };
-
-  const handleDragEnd = (type: ItemType, index: number) => {
-    const id = dragKeyToId(type, index);
-    delete dragBaseRef.current[id];
-  };
-
   const [scrollLeftPx, setScrollLeftPx] = useState(0);
   const [viewportWidthPx, setViewportWidthPx] = useState(0);
 
@@ -154,12 +119,79 @@ export default function TimelineGraph({
     };
   }, []);
 
-  // px -> sec 변환계수
   const pxPerSec = useMemo(() => {
     const span = maxTime - minTime;
     if (span <= 0 || viewportWidthPx <= 0) return 0;
     return (widthMult * viewportWidthPx) / span;
   }, [maxTime, minTime, widthMult, viewportWidthPx]);
+
+  const handleDragMove = (type: ItemType, index: number, dxPx: number) => {
+    if (!editable) return;
+    if (pxPerSec <= 0) return;
+
+    const id = dragKeyToId(type, index);
+    const base = dragBaseRef.current[id];
+    if (base === undefined) return;
+
+    const deltaSec = -dxPx / pxPerSec;
+    const snapped = snapToFrame(base + deltaSec);
+    const clampedSec = clamp(snapped, minTime, maxTime);
+
+    if (type === "attack") {
+      setAttack((prev) => {
+        if (!prev[index]) return prev;
+        const next = [...prev];
+        next[index] = { ...next[index], startTime: clampedSec };
+        return next;
+      });
+    } else {
+      setBuff((prev) => {
+        if (!prev[index]) return prev;
+        const next = [...prev];
+        next[index] = { ...next[index], startTime: clampedSec };
+        return next;
+      });
+    }
+  };
+
+  const handleDragEnd = (type: ItemType, index: number) => {
+    const id = dragKeyToId(type, index);
+    delete dragBaseRef.current[id];
+  };
+
+  // ===== 커밋 함수들: snap+clamp는 여기서만 =====
+  const commitAttackStartTime = (
+    attackIndex: number,
+    newStartTimeSec: number,
+  ) => {
+    const snapped = snapToFrame(newStartTimeSec);
+    const clampedSec = clamp(snapped, minTime, maxTime);
+
+    setAttack((prev) => {
+      if (!prev[attackIndex]) return prev;
+      const next = [...prev];
+      next[attackIndex] = { ...next[attackIndex], startTime: clampedSec };
+      return next;
+    });
+  };
+
+  const commitBuffStartTime = (buffIndex: number, newStartTimeSec: number) => {
+    const snapped = snapToFrame(newStartTimeSec);
+    const clampedSec = clamp(snapped, minTime, maxTime);
+
+    setBuff((prev) => {
+      if (!prev[buffIndex]) return prev;
+      const next = [...prev];
+      next[buffIndex] = { ...next[buffIndex], startTime: clampedSec };
+      return next;
+    });
+  };
+
+  const getAttackStartTimeStr = (i: number) =>
+    attack[i] ? secToTimeString(attack[i].startTime) : "00:00.000";
+
+  const getBuffStartTimeStr = (i: number) =>
+    buff[i] ? secToTimeString(buff[i].startTime) : "00:00.000";
 
   return (
     <div>
@@ -284,6 +316,8 @@ export default function TimelineGraph({
                 onDragStart={() => handleDragStart("attack", i)}
                 onDragMove={(dxPx) => handleDragMove("attack", i, dxPx)}
                 onDragEnd={() => handleDragEnd("attack", i)}
+                onCommitStartTime={(newSec) => commitAttackStartTime(i, newSec)}
+                getResetDraftValue={() => getAttackStartTimeStr(i)}
               />
             ))}
 
@@ -307,10 +341,13 @@ export default function TimelineGraph({
                 onDragStart={() => handleDragStart("buff", i)}
                 onDragMove={(dxPx) => handleDragMove("buff", i, dxPx)}
                 onDragEnd={() => handleDragEnd("buff", i)}
+                onCommitStartTime={(newSec) => commitBuffStartTime(i, newSec)}
+                getResetDraftValue={() => getBuffStartTimeStr(i)}
               />
             ))}
           </div>
         </div>
+
         <button onClick={resetData}>타임라인 초기화</button>
       </div>
     </div>
