@@ -11,6 +11,18 @@ const FPS = 30;
 const snapToFrame = (sec: number) => Math.round(sec * FPS) / FPS;
 const clamp = (v: number, lo: number, hi: number) =>
   Math.min(hi, Math.max(lo, v));
+const toFrame = (sec: number) => Math.round(sec * FPS);
+
+type DragCtx = {
+  // 드래그 시작 시점의 "기준 아이템" base
+  baseStartTime: number;
+  character: string;
+  baseFrame: number;
+
+  // 그룹 내 각 아이템의 baseStartTime을 저장 (절대 위치 계산용)
+  attackBases: Record<number, number>; // index -> baseStartTime
+  buffBases: Record<number, number>; // index -> baseStartTime
+};
 
 export default function TimelineGraph({
   attackItems,
@@ -84,17 +96,43 @@ export default function TimelineGraph({
   };
 
   const dragKeyToId = (type: ItemType, index: number) => `${type}:${index}`;
-  const dragBaseRef = React.useRef<Record<string, number>>({});
+  const dragBaseRef = React.useRef<Record<string, DragCtx>>({});
 
   const handleDragStart = (type: ItemType, index: number) => {
     if (!editable) return;
 
     const id = dragKeyToId(type, index);
-    const base =
-      type === "attack" ? attack[index]?.startTime : buff[index]?.startTime;
-    if (base === undefined) return;
+    const src = type === "attack" ? attack[index] : buff[index];
+    if (!src) return;
 
-    dragBaseRef.current[id] = base;
+    const character = src.character;
+    const baseStartTime = src.startTime;
+    const baseFrame = toFrame(baseStartTime);
+
+    // 그룹 고정 + 각 아이템 base 기록
+    const attackBases: Record<number, number> = {};
+    const buffBases: Record<number, number> = {};
+
+    for (let i = 0; i < attack.length; i++) {
+      const a = attack[i];
+      if (a.character === character && toFrame(a.startTime) === baseFrame) {
+        attackBases[i] = a.startTime;
+      }
+    }
+    for (let i = 0; i < buff.length; i++) {
+      const b = buff[i];
+      if (b.character === character && toFrame(b.startTime) === baseFrame) {
+        buffBases[i] = b.startTime;
+      }
+    }
+
+    dragBaseRef.current[id] = {
+      baseStartTime,
+      character,
+      baseFrame,
+      attackBases,
+      buffBases,
+    };
   };
 
   const [scrollLeftPx, setScrollLeftPx] = useState(0);
@@ -125,33 +163,61 @@ export default function TimelineGraph({
     return (widthMult * viewportWidthPx) / span;
   }, [maxTime, minTime, widthMult, viewportWidthPx]);
 
+  const applyDragDeltaToCtx = (ctx: DragCtx, deltaSec: number) => {
+    // 기준 아이템 target(절대 위치)
+    const target = ctx.baseStartTime + deltaSec;
+    const clampedTarget = clamp(snapToFrame(target), minTime, maxTime);
+
+    // clamp로 인해 기준 아이템이 실제로 움직인 delta(=실제 delta)
+    const actualDelta = clampedTarget - ctx.baseStartTime;
+
+    setAttack((prev) => {
+      const keys = Object.keys(ctx.attackBases);
+      if (keys.length === 0) return prev;
+
+      let changed = false;
+      const next = [...prev];
+      for (const k of keys) {
+        const i = Number(k);
+        const base = ctx.attackBases[i];
+        const it = next[i];
+        if (!it) continue;
+        changed = true;
+        const moved = clamp(snapToFrame(base + actualDelta), minTime, maxTime);
+        next[i] = { ...it, startTime: moved };
+      }
+      return changed ? next : prev;
+    });
+
+    setBuff((prev) => {
+      const keys = Object.keys(ctx.buffBases);
+      if (keys.length === 0) return prev;
+
+      let changed = false;
+      const next = [...prev];
+      for (const k of keys) {
+        const i = Number(k);
+        const base = ctx.buffBases[i];
+        const it = next[i];
+        if (!it) continue;
+        changed = true;
+        const moved = clamp(snapToFrame(base + actualDelta), minTime, maxTime);
+        next[i] = { ...it, startTime: moved };
+      }
+      return changed ? next : prev;
+    });
+  };
+
   const handleDragMove = (type: ItemType, index: number, dxPx: number) => {
     if (!editable) return;
     if (pxPerSec <= 0) return;
 
     const id = dragKeyToId(type, index);
-    const base = dragBaseRef.current[id];
-    if (base === undefined) return;
+    const ctx = dragBaseRef.current[id];
+    if (!ctx) return;
 
     const deltaSec = -dxPx / pxPerSec;
-    const snapped = snapToFrame(base + deltaSec);
-    const clampedSec = clamp(snapped, minTime, maxTime);
-
-    if (type === "attack") {
-      setAttack((prev) => {
-        if (!prev[index]) return prev;
-        const next = [...prev];
-        next[index] = { ...next[index], startTime: clampedSec };
-        return next;
-      });
-    } else {
-      setBuff((prev) => {
-        if (!prev[index]) return prev;
-        const next = [...prev];
-        next[index] = { ...next[index], startTime: clampedSec };
-        return next;
-      });
-    }
+    applyDragDeltaToCtx(ctx, deltaSec);
   };
 
   const handleDragEnd = (type: ItemType, index: number) => {
@@ -159,31 +225,150 @@ export default function TimelineGraph({
     delete dragBaseRef.current[id];
   };
 
-  // ===== 커밋 함수들: snap+clamp는 여기서만 =====
+  // 커밋: 해당 아이템이 속한 그룹을 그 순간 기준으로 캡처하고, "절대 위치"로 갱신
   const commitAttackStartTime = (
     attackIndex: number,
     newStartTimeSec: number,
   ) => {
-    const snapped = snapToFrame(newStartTimeSec);
-    const clampedSec = clamp(snapped, minTime, maxTime);
+    const src = attack[attackIndex];
+    if (!src) return;
 
+    const character = src.character;
+    const baseStartTime = src.startTime;
+    const baseFrame = toFrame(baseStartTime);
+
+    const attackBases: Record<number, number> = {};
+    const buffBases: Record<number, number> = {};
+
+    for (let i = 0; i < attack.length; i++) {
+      const a = attack[i];
+      if (a.character === character && toFrame(a.startTime) === baseFrame) {
+        attackBases[i] = a.startTime;
+      }
+    }
+    for (let i = 0; i < buff.length; i++) {
+      const b = buff[i];
+      if (b.character === character && toFrame(b.startTime) === baseFrame) {
+        buffBases[i] = b.startTime;
+      }
+    }
+
+    const ctx: DragCtx = {
+      baseStartTime,
+      character,
+      baseFrame,
+      attackBases,
+      buffBases,
+    };
+
+    const snapped = snapToFrame(newStartTimeSec);
+    const clampedTarget = clamp(snapped, minTime, maxTime);
+    const actualDelta = clampedTarget - baseStartTime;
+
+    // deltaSec 대신 actualDelta로 바로 적용(절대갱신)
     setAttack((prev) => {
-      if (!prev[attackIndex]) return prev;
+      const keys = Object.keys(ctx.attackBases);
+      if (keys.length === 0) return prev;
+      let changed = false;
       const next = [...prev];
-      next[attackIndex] = { ...next[attackIndex], startTime: clampedSec };
-      return next;
+      for (const k of keys) {
+        const i = Number(k);
+        const base = ctx.attackBases[i];
+        const it = next[i];
+        if (!it) continue;
+        changed = true;
+        const moved = clamp(snapToFrame(base + actualDelta), minTime, maxTime);
+        next[i] = { ...it, startTime: moved };
+      }
+      return changed ? next : prev;
+    });
+
+    setBuff((prev) => {
+      const keys = Object.keys(ctx.buffBases);
+      if (keys.length === 0) return prev;
+      let changed = false;
+      const next = [...prev];
+      for (const k of keys) {
+        const i = Number(k);
+        const base = ctx.buffBases[i];
+        const it = next[i];
+        if (!it) continue;
+        changed = true;
+        const moved = clamp(snapToFrame(base + actualDelta), minTime, maxTime);
+        next[i] = { ...it, startTime: moved };
+      }
+      return changed ? next : prev;
     });
   };
 
   const commitBuffStartTime = (buffIndex: number, newStartTimeSec: number) => {
+    const src = buff[buffIndex];
+    if (!src) return;
+
+    const character = src.character;
+    const baseStartTime = src.startTime;
+    const baseFrame = toFrame(baseStartTime);
+
+    const attackBases: Record<number, number> = {};
+    const buffBases: Record<number, number> = {};
+
+    for (let i = 0; i < attack.length; i++) {
+      const a = attack[i];
+      if (a.character === character && toFrame(a.startTime) === baseFrame) {
+        attackBases[i] = a.startTime;
+      }
+    }
+    for (let i = 0; i < buff.length; i++) {
+      const b = buff[i];
+      if (b.character === character && toFrame(b.startTime) === baseFrame) {
+        buffBases[i] = b.startTime;
+      }
+    }
+
+    const ctx: DragCtx = {
+      baseStartTime,
+      character,
+      baseFrame,
+      attackBases,
+      buffBases,
+    };
+
     const snapped = snapToFrame(newStartTimeSec);
-    const clampedSec = clamp(snapped, minTime, maxTime);
+    const clampedTarget = clamp(snapped, minTime, maxTime);
+    const actualDelta = clampedTarget - baseStartTime;
+
+    setAttack((prev) => {
+      const keys = Object.keys(ctx.attackBases);
+      if (keys.length === 0) return prev;
+      let changed = false;
+      const next = [...prev];
+      for (const k of keys) {
+        const i = Number(k);
+        const base = ctx.attackBases[i];
+        const it = next[i];
+        if (!it) continue;
+        changed = true;
+        const moved = clamp(snapToFrame(base + actualDelta), minTime, maxTime);
+        next[i] = { ...it, startTime: moved };
+      }
+      return changed ? next : prev;
+    });
 
     setBuff((prev) => {
-      if (!prev[buffIndex]) return prev;
+      const keys = Object.keys(ctx.buffBases);
+      if (keys.length === 0) return prev;
+      let changed = false;
       const next = [...prev];
-      next[buffIndex] = { ...next[buffIndex], startTime: clampedSec };
-      return next;
+      for (const k of keys) {
+        const i = Number(k);
+        const base = ctx.buffBases[i];
+        const it = next[i];
+        if (!it) continue;
+        changed = true;
+        const moved = clamp(snapToFrame(base + actualDelta), minTime, maxTime);
+        next[i] = { ...it, startTime: moved };
+      }
+      return changed ? next : prev;
     });
   };
 
