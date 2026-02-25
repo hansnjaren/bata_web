@@ -27,6 +27,8 @@ interface BuffSkill {
   UE2: boolean;
 }
 
+type ItemType = "attack" | "buff";
+
 interface Character {
   name: string;
   alias: string[];

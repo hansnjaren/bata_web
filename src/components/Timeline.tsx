@@ -227,6 +227,8 @@ export default function Timeline({
     }
   };
 
+  const editable = location.pathname === "/tacticEditor";
+
   return (
     <div>
       <TimelineGraph
@@ -235,6 +237,7 @@ export default function Timeline({
         checkedUE2={checkedUE2}
         widthMult={widthMult}
         timeZoneNum={timeZoneNum}
+        editable={editable}
       ></TimelineGraph>
 
       <div>

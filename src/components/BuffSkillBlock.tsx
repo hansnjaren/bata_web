@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import { defaultHeight } from "../constants/sizes";
 import { defaultDurationMultiplier } from "../constants/skills";
@@ -15,6 +15,11 @@ interface BuffSkillBlockProps {
   onHover: () => void;
   onLeave: () => void;
   onClick: () => void;
+
+  editable?: boolean;
+  onDragStart?: () => void;
+  onDragMove?: (dxPx: number) => void; // 누적 dxPx
+  onDragEnd?: () => void;
 }
 
 export function BuffSkillBlock({
@@ -28,10 +33,16 @@ export function BuffSkillBlock({
   onHover,
   onLeave,
   onClick,
+  editable = false,
+  onDragStart,
+  onDragMove,
+  onDragEnd,
 }: BuffSkillBlockProps) {
   const { startTime, delay, duration, character } = item;
+
   const exactDuration =
     duration * (checkedUE2[character] ? defaultDurationMultiplier : 1);
+
   const ref = useRef<HTMLDivElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
 
@@ -42,7 +53,10 @@ export function BuffSkillBlock({
   }>({ top: 0, left: 0 });
   const [tooltipDir, setTooltipDir] = useState<"right" | "left">("right");
 
-  useEffect(() => {
+  // drag state
+  const dragRef = useRef<null | { pointerId: number; startX: number }>(null);
+
+  useLayoutEffect(() => {
     if (isOpen && ref.current && tooltipRef.current) {
       const rect = ref.current.getBoundingClientRect();
       const clientWidth = document.documentElement.clientWidth;
@@ -62,7 +76,7 @@ export function BuffSkillBlock({
         });
       }
     }
-  }, [isOpen]);
+  }, [isOpen, startTime]);
 
   return (
     <>
@@ -70,16 +84,13 @@ export function BuffSkillBlock({
         ref={ref}
         style={{
           position: "absolute",
-          left: `${
-            (widthMult * (maxTime - startTime) * 100) / (maxTime - minTime)
-          }%`,
-          width: `${
-            (widthMult * (delay + exactDuration) * 100) / (maxTime - minTime)
-          }%`,
+          left: `${(widthMult * (maxTime - startTime) * 100) / (maxTime - minTime)}%`,
+          width: `${(widthMult * (delay + exactDuration) * 100) / (maxTime - minTime)}%`,
           top: defaultHeight * index,
           height: defaultHeight,
           borderLeft: "1px solid red",
-          cursor: "pointer",
+          cursor: editable ? "ew-resize" : "pointer",
+          touchAction: editable ? "none" : "auto", // 터치 제스처로 인한 cancel 방지에 도움 [web:92]
         }}
         onMouseEnter={onHover}
         onMouseLeave={onLeave}
@@ -87,14 +98,46 @@ export function BuffSkillBlock({
           e.stopPropagation();
           onClick();
         }}
+        onPointerDown={(e) => {
+          if (!editable) return;
+          e.stopPropagation();
+          if (e.pointerType === "mouse" && e.button !== 0) return;
+
+          (e.currentTarget as HTMLDivElement).setPointerCapture(e.pointerId); // [web:50]
+          dragRef.current = { pointerId: e.pointerId, startX: e.clientX };
+          onDragStart?.();
+        }}
+        onPointerMove={(e) => {
+          if (!editable) return;
+          const s = dragRef.current;
+          if (!s || s.pointerId !== e.pointerId) return;
+
+          onDragMove?.(e.clientX - s.startX);
+        }}
+        onPointerUp={(e) => {
+          if (!editable) return;
+          const s = dragRef.current;
+          if (!s || s.pointerId !== e.pointerId) return;
+
+          dragRef.current = null;
+          // pointerup에서 캡처는 자동 해제될 수 있지만, 명시적으로 호출해도 됨 [web:50]
+          try {
+            (e.currentTarget as HTMLDivElement).releasePointerCapture(
+              e.pointerId,
+            );
+          } catch {}
+
+          onDragEnd?.();
+        }}
+        onPointerCancel={(e) => {
+          const s = dragRef.current;
+          if (!s || s.pointerId !== e.pointerId) return;
+
+          dragRef.current = null;
+          onDragEnd?.(); // 브라우저가 스크롤/줌으로 전환하면 cancel 날 수 있음 [web:138]
+        }}
       >
-        <div
-          style={{
-            position: "relative",
-            width: "100%",
-            height: "100%",
-          }}
-        >
+        <div style={{ position: "relative", width: "100%", height: "100%" }}>
           <div
             style={{
               position: "absolute",
