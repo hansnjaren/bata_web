@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import { defaultHeight } from "../constants/sizes";
 import { secToTimeString } from "../utils/time";
@@ -38,7 +38,7 @@ export function AttackSkillBlock({
   }>({ top: 0, left: 0 });
   const [tooltipDir, setTooltipDir] = useState<"right" | "left">("right");
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (isOpen && ref.current && tooltipRef.current) {
       const rect = ref.current.getBoundingClientRect();
       const clientWidth = document.documentElement.clientWidth;

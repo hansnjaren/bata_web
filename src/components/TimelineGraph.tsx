@@ -195,41 +195,54 @@ export default function TimelineGraph({
               {item[1] && `>${item[1]}`}
             </div>
           ))}
-          {attackItems.map((item, i) => (
-            <AttackSkillBlock
-              key={i}
-              item={item}
-              maxTime={maxTime}
-              minTime={minTime}
-              widthMult={widthMult}
-              index={skillTypes.findIndex(
-                ([char, det]) => char === item.character && det === item.detail,
-              )}
-              isOpen={openTooltip?.type === "attack" && openTooltip.index === i}
-              totalItems={skillTypes.length}
-              onHover={() => handleHover("attack", i)}
-              onLeave={() => handleLeave("attack", i)}
-              onClick={() => handleClick("attack", i)}
-            />
-          ))}
+          <div
+            style={{
+              position: "relative",
+              width: `${widthMult * viewportWidthPx}px`,
+              height: `${defaultHeight * skillTypes.length}px`,
+              overflow: "hidden",
+            }}
+          >
+            {attackItems.map((item, i) => (
+              <AttackSkillBlock
+                key={i}
+                item={item}
+                maxTime={maxTime}
+                minTime={minTime}
+                widthMult={widthMult}
+                index={skillTypes.findIndex(
+                  ([char, det]) =>
+                    char === item.character && det === item.detail,
+                )}
+                isOpen={
+                  openTooltip?.type === "attack" && openTooltip.index === i
+                }
+                totalItems={skillTypes.length}
+                onHover={() => handleHover("attack", i)}
+                onLeave={() => handleLeave("attack", i)}
+                onClick={() => handleClick("attack", i)}
+              />
+            ))}
 
-          {buffItems.map((item, i) => (
-            <BuffSkillBlock
-              key={i}
-              item={item}
-              maxTime={maxTime}
-              minTime={minTime}
-              widthMult={widthMult}
-              checkedUE2={checkedUE2}
-              index={skillTypes.findIndex(
-                ([char, det]) => char === item.character && det === item.detail,
-              )}
-              isOpen={openTooltip?.type === "buff" && openTooltip.index === i}
-              onHover={() => handleHover("buff", i)}
-              onLeave={() => handleLeave("buff", i)}
-              onClick={() => handleClick("buff", i)}
-            />
-          ))}
+            {buffItems.map((item, i) => (
+              <BuffSkillBlock
+                key={i}
+                item={item}
+                maxTime={maxTime}
+                minTime={minTime}
+                widthMult={widthMult}
+                checkedUE2={checkedUE2}
+                index={skillTypes.findIndex(
+                  ([char, det]) =>
+                    char === item.character && det === item.detail,
+                )}
+                isOpen={openTooltip?.type === "buff" && openTooltip.index === i}
+                onHover={() => handleHover("buff", i)}
+                onLeave={() => handleLeave("buff", i)}
+                onClick={() => handleClick("buff", i)}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </div>
