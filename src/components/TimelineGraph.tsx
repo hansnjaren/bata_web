@@ -46,12 +46,16 @@ export default function TimelineGraph({
     buffItems.map((it) => ({ ...it })),
   );
 
-  const resetData = () => {
+  const resetData = (attackItems: AttackSkill[], buffItems: BuffSkill[]) => {
     setAttack(
       attackItems.map((it) => ({ ...it, allDelays: [...it.allDelays] })),
     );
     setBuff(buffItems.map((it) => ({ ...it })));
   };
+
+  useEffect(() => {
+    resetData(attackItems, buffItems);
+  }, [attackItems, buffItems]);
 
   const skillTypes = useSkillTypes(attack, buff);
   const { maxTime, minTime } = useTimeBounds(attack, buff, checkedUE2);
@@ -533,7 +537,11 @@ export default function TimelineGraph({
           </div>
         </div>
 
-        <button onClick={resetData}>타임라인 초기화</button>
+        {editable && (
+          <button onClick={() => resetData(attackItems, buffItems)}>
+            타임라인 초기화
+          </button>
+        )}
       </div>
     </div>
   );
