@@ -211,35 +211,41 @@ export function AttackSkillBlock({
             스킬 사용 캐릭터: {character}
             <br />
             스킬 사용 시간:{" "}
-            <input
-              ref={inputRef}
-              value={draftTime}
-              inputMode="decimal"
-              onChange={(e) => {
-                const filtered = e.target.value.replace(/[^\d:.\-+]/g, "");
-                setDraftTime(filtered);
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  commit();
-                } else if (e.key === "Escape") {
-                  e.preventDefault();
-                  setDraftTime(getResetDraftValue());
-                }
-              }}
-              style={{ width: 140, fontFamily: "monospace" }}
-              placeholder="(m:)s(.0)"
-            />
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                commit();
-              }}
-            >
-              적용
-            </button>
+            {editable ? (
+              <span>
+                <input
+                  ref={inputRef}
+                  value={draftTime}
+                  inputMode="decimal"
+                  onChange={(e) => {
+                    const filtered = e.target.value.replace(/[^\d:.\-+]/g, "");
+                    setDraftTime(filtered);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      commit();
+                    } else if (e.key === "Escape") {
+                      e.preventDefault();
+                      setDraftTime(getResetDraftValue());
+                    }
+                  }}
+                  style={{ width: 140, fontFamily: "monospace" }}
+                  placeholder="(m:)s(.0)"
+                />
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    commit();
+                  }}
+                >
+                  적용
+                </button>
+              </span>
+            ) : (
+              <span>{draftTime}</span>
+            )}
             <br />
             모든 타수 시점:{" "}
             {allDelays.map((d) => secToTimeString(startTime - d)).join(", ")}

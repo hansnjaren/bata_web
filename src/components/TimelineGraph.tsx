@@ -141,23 +141,44 @@ export default function TimelineGraph({
 
   const [scrollLeftPx, setScrollLeftPx] = useState(0);
   const [viewportWidthPx, setViewportWidthPx] = useState(0);
+  const timelineRef = React.useRef<HTMLDivElement | null>(null);
 
-  React.useEffect(() => {
-    const element = document.getElementById("timelineView");
+  // React.useLayoutEffect(() => {
+  //   const element = document.getElementById("timelineView");
+  //   if (!element) return;
+
+  //   const updateRect = () =>
+  //     setViewportWidthPx(element.getBoundingClientRect().width);
+  //   updateRect();
+
+  //   const onElementScroll = () => setScrollLeftPx(element.scrollLeft);
+  //   const onResize = () => updateRect();
+
+  //   element.addEventListener("scroll", onElementScroll);
+  //   window.addEventListener("resize", onResize);
+  //   return () => {
+  //     element.removeEventListener("scroll", onElementScroll);
+  //     window.removeEventListener("resize", onResize);
+  //   };
+  // }, []);
+
+  React.useLayoutEffect(() => {
+    const element = timelineRef.current;
     if (!element) return;
 
     const updateRect = () =>
       setViewportWidthPx(element.getBoundingClientRect().width);
     updateRect();
 
-    const onElementScroll = () => setScrollLeftPx(element.scrollLeft);
-    const onResize = () => updateRect();
+    const onScroll = () => setScrollLeftPx(element.scrollLeft);
+    element.addEventListener("scroll", onScroll);
 
-    element.addEventListener("scroll", onElementScroll);
-    window.addEventListener("resize", onResize);
+    const ro = new ResizeObserver(() => updateRect());
+    ro.observe(element);
+
     return () => {
-      element.removeEventListener("scroll", onElementScroll);
-      window.removeEventListener("resize", onResize);
+      element.removeEventListener("scroll", onScroll);
+      ro.disconnect();
     };
   }, []);
 
@@ -395,27 +416,19 @@ export default function TimelineGraph({
           }}
         >
           <div style={{ display: "inline-block" }}>
-            {secToTimeString(
-              maxTime -
-                ((maxTime - minTime) * scrollLeftPx) /
-                  (viewportWidthPx * widthMult),
-            )}
+            {secToTimeString(maxTime - scrollLeftPx / pxPerSec)}
           </div>
 
           <div style={{ display: "inline-block" }}>
             {secToTimeString(
-              maxTime -
-                ((maxTime - minTime) * (scrollLeftPx + viewportWidthPx)) /
-                  (viewportWidthPx * widthMult),
+              maxTime - (scrollLeftPx + viewportWidthPx) / pxPerSec,
             )}
           </div>
 
           {Array.from({ length: timeZoneNum - 1 }).map((_, i) => {
             const ratio = (i + 1) / timeZoneNum;
             const time =
-              maxTime -
-              ((maxTime - minTime) * (scrollLeftPx + viewportWidthPx * ratio)) /
-                (viewportWidthPx * widthMult);
+              maxTime - (scrollLeftPx + viewportWidthPx * ratio) / pxPerSec;
             return (
               <div
                 key={i}
@@ -448,13 +461,8 @@ export default function TimelineGraph({
         </div>
 
         <div
-          id="timelineView"
           style={{
             position: "relative",
-            width: "100%",
-            height: `${defaultHeight * skillTypes.length + 20}px`,
-            boxSizing: "border-box",
-            overflow: "auto",
           }}
         >
           {skillTypes.map((item, i) => (
@@ -464,9 +472,10 @@ export default function TimelineGraph({
                 position: "absolute",
                 top: `${defaultHeight * i}px`,
                 height: `${defaultHeight}px`,
-                width: `${100 * widthMult}%`,
+                width: `${viewportWidthPx}px`,
                 boxSizing: "border-box",
                 borderBottom: "1px solid black",
+                borderRight: "1px solid black",
                 backgroundColor: "transparent",
               }}
             >
@@ -476,64 +485,80 @@ export default function TimelineGraph({
           ))}
 
           <div
+            id="timelineView"
+            ref={timelineRef}
             style={{
               position: "relative",
-              width: `${widthMult * viewportWidthPx}px`,
-              height: `${defaultHeight * skillTypes.length}px`,
-              overflow: "hidden",
+              width: "100%",
+              height: `${defaultHeight * skillTypes.length + 20}px`,
+              boxSizing: "border-box",
+              overflow: "auto",
             }}
           >
-            {attack.map((item, i) => (
-              <AttackSkillBlock
-                key={`attack:${i}`}
-                item={item}
-                maxTime={maxTime}
-                minTime={minTime}
-                widthMult={widthMult}
-                index={skillTypes.findIndex(
-                  ([char, det]) =>
-                    char === item.character && det === item.detail,
-                )}
-                isOpen={
-                  openTooltip?.type === "attack" && openTooltip.index === i
-                }
-                totalItems={skillTypes.length}
-                onHover={() => handleHover("attack", i)}
-                onLeave={() => handleLeave()}
-                onClick={() => handleClick("attack", i)}
-                editable={editable}
-                onDragStart={() => handleDragStart("attack", i)}
-                onDragMove={(dxPx) => handleDragMove("attack", i, dxPx)}
-                onDragEnd={() => handleDragEnd("attack", i)}
-                onCommitStartTime={(newSec) => commitAttackStartTime(i, newSec)}
-                getResetDraftValue={() => getAttackStartTimeStr(i)}
-              />
-            ))}
+            <div
+              style={{
+                position: "relative",
+                width: `${widthMult * viewportWidthPx}px`,
+                height: `${defaultHeight * skillTypes.length}px`,
+                overflow: "hidden",
+              }}
+            >
+              {attack.map((item, i) => (
+                <AttackSkillBlock
+                  key={`attack:${i}`}
+                  item={item}
+                  maxTime={maxTime}
+                  minTime={minTime}
+                  widthMult={widthMult}
+                  index={skillTypes.findIndex(
+                    ([char, det]) =>
+                      char === item.character && det === item.detail,
+                  )}
+                  isOpen={
+                    openTooltip?.type === "attack" && openTooltip.index === i
+                  }
+                  totalItems={skillTypes.length}
+                  onHover={() => handleHover("attack", i)}
+                  onLeave={() => handleLeave()}
+                  onClick={() => handleClick("attack", i)}
+                  editable={editable}
+                  onDragStart={() => handleDragStart("attack", i)}
+                  onDragMove={(dxPx) => handleDragMove("attack", i, dxPx)}
+                  onDragEnd={() => handleDragEnd("attack", i)}
+                  onCommitStartTime={(newSec) =>
+                    commitAttackStartTime(i, newSec)
+                  }
+                  getResetDraftValue={() => getAttackStartTimeStr(i)}
+                />
+              ))}
 
-            {buff.map((item, i) => (
-              <BuffSkillBlock
-                key={`buff:${i}`}
-                item={item}
-                maxTime={maxTime}
-                minTime={minTime}
-                widthMult={widthMult}
-                checkedUE2={checkedUE2}
-                index={skillTypes.findIndex(
-                  ([char, det]) =>
-                    char === item.character && det === item.detail,
-                )}
-                isOpen={openTooltip?.type === "buff" && openTooltip.index === i}
-                onHover={() => handleHover("buff", i)}
-                onLeave={() => handleLeave()}
-                onClick={() => handleClick("buff", i)}
-                editable={editable}
-                onDragStart={() => handleDragStart("buff", i)}
-                onDragMove={(dxPx) => handleDragMove("buff", i, dxPx)}
-                onDragEnd={() => handleDragEnd("buff", i)}
-                onCommitStartTime={(newSec) => commitBuffStartTime(i, newSec)}
-                getResetDraftValue={() => getBuffStartTimeStr(i)}
-              />
-            ))}
+              {buff.map((item, i) => (
+                <BuffSkillBlock
+                  key={`buff:${i}`}
+                  item={item}
+                  maxTime={maxTime}
+                  minTime={minTime}
+                  widthMult={widthMult}
+                  checkedUE2={checkedUE2}
+                  index={skillTypes.findIndex(
+                    ([char, det]) =>
+                      char === item.character && det === item.detail,
+                  )}
+                  isOpen={
+                    openTooltip?.type === "buff" && openTooltip.index === i
+                  }
+                  onHover={() => handleHover("buff", i)}
+                  onLeave={() => handleLeave()}
+                  onClick={() => handleClick("buff", i)}
+                  editable={editable}
+                  onDragStart={() => handleDragStart("buff", i)}
+                  onDragMove={(dxPx) => handleDragMove("buff", i, dxPx)}
+                  onDragEnd={() => handleDragEnd("buff", i)}
+                  onCommitStartTime={(newSec) => commitBuffStartTime(i, newSec)}
+                  getResetDraftValue={() => getBuffStartTimeStr(i)}
+                />
+              ))}
+            </div>
           </div>
         </div>
 
