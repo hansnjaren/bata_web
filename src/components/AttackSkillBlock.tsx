@@ -120,7 +120,7 @@ export function AttackSkillBlock({
           top: defaultHeight * index,
           height: defaultHeight,
           borderLeft: "1px solid black",
-          backgroundColor: "#0000ff33",
+          backgroundColor: "#ff000033",
           cursor: editable ? "ew-resize" : "pointer",
           touchAction: editable ? "none" : "auto",
         }}
