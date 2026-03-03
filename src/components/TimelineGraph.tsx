@@ -143,25 +143,6 @@ export default function TimelineGraph({
   const [viewportWidthPx, setViewportWidthPx] = useState(0);
   const timelineRef = React.useRef<HTMLDivElement | null>(null);
 
-  // React.useLayoutEffect(() => {
-  //   const element = document.getElementById("timelineView");
-  //   if (!element) return;
-
-  //   const updateRect = () =>
-  //     setViewportWidthPx(element.getBoundingClientRect().width);
-  //   updateRect();
-
-  //   const onElementScroll = () => setScrollLeftPx(element.scrollLeft);
-  //   const onResize = () => updateRect();
-
-  //   element.addEventListener("scroll", onElementScroll);
-  //   window.addEventListener("resize", onResize);
-  //   return () => {
-  //     element.removeEventListener("scroll", onElementScroll);
-  //     window.removeEventListener("resize", onResize);
-  //   };
-  // }, []);
-
   React.useLayoutEffect(() => {
     const element = timelineRef.current;
     if (!element) return;
@@ -479,8 +460,9 @@ export default function TimelineGraph({
                 backgroundColor: "transparent",
               }}
             >
-              {item[0]}
-              {item[1] && `>${item[1]}`}
+              {item.character}
+              {item.type && ` ${item.type}`}
+              {item.detail && `>${item.detail}`}
             </div>
           ))}
 
@@ -511,8 +493,10 @@ export default function TimelineGraph({
                   minTime={minTime}
                   widthMult={widthMult}
                   index={skillTypes.findIndex(
-                    ([char, det]) =>
-                      char === item.character && det === item.detail,
+                    (cand) =>
+                      cand.character === item.character &&
+                      cand.type === item.type &&
+                      cand.detail === item.detail,
                   )}
                   isOpen={
                     openTooltip?.type === "attack" && openTooltip.index === i
@@ -541,8 +525,10 @@ export default function TimelineGraph({
                   widthMult={widthMult}
                   checkedUE2={checkedUE2}
                   index={skillTypes.findIndex(
-                    ([char, det]) =>
-                      char === item.character && det === item.detail,
+                    (cand) =>
+                      cand.character === item.character &&
+                      cand.type === item.type &&
+                      cand.detail === item.detail,
                   )}
                   isOpen={
                     openTooltip?.type === "buff" && openTooltip.index === i

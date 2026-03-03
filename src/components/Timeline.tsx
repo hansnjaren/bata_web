@@ -121,7 +121,8 @@ export default function Timeline({
           {
             startTime: tSec,
             character: result.name,
-            detail: target,
+            type: result.skill.type.endsWith("스") ? result.skill.type : null,
+            detail: target || null,
             allDelays: result.skill.delays, // 배열 전체 저장
           },
         ];
@@ -161,7 +162,8 @@ export default function Timeline({
             delay: result.skill.delays[0] || 0,
             duration: result.skill.duration,
             character: result.name,
-            detail: targetChar?.name || "",
+            type: result.skill.type.endsWith("스") ? result.skill.type : null,
+            detail: targetChar?.name || null,
             UE2: characters.find((c) => c.name === result.name)?.UE2 ?? false,
           },
         ];

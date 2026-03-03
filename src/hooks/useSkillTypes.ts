@@ -4,20 +4,22 @@ export const useSkillTypes = (
   attackItems: SkillItem[],
   buffItems: SkillItem[],
 ) => {
-  const [skillTypes, setSkillTypes] = useState<Array<[string, string | null]>>(
-    [],
-  );
+  const [skillTypes, setSkillTypes] = useState<Array<SkillItem>>([]);
 
   useEffect(() => {
     const combined = [...attackItems, ...buffItems];
     const uniqueSet = new Set<string>();
-    const newSkillTypes: [string, string | null][] = [];
+    const newSkillTypes: SkillItem[] = [];
 
     combined.forEach((item) => {
-      const key = `${item.character}-${item.detail}`;
+      const key = `${item.character}-${item.type}-${item.detail}`;
       if (!uniqueSet.has(key)) {
         uniqueSet.add(key);
-        newSkillTypes.push([item.character, item.detail]);
+        newSkillTypes.push({
+          character: item.character,
+          type: item.type,
+          detail: item.detail,
+        });
       }
     });
     setSkillTypes(newSkillTypes);
