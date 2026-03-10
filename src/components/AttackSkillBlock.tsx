@@ -59,13 +59,6 @@ export function AttackSkillBlock({
     queueMicrotask(() => inputRef.current?.focus());
   }, [isOpen]);
 
-  useEffect(() => {
-    if (!isOpen) return;
-    return () => {
-      setDraftTime("");
-    };
-  }, [isOpen]);
-
   const commit = () => {
     const r = parseNormalizeTimeNoSnap(draftTime);
     if (r == null) return;
