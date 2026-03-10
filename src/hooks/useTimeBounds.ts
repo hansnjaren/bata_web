@@ -1,0 +1,40 @@
+import { useMemo } from "react";
+import { defaultDurationMultiplier } from "../constants/skills";
+import { AttackSkill, BuffSkill } from "../interfaces/timelineData";
+
+export const useTimeBounds = (
+  attackItems: AttackSkill[],
+  buffItems: BuffSkill[],
+  checkedUE2: Record<string, boolean>,
+) => {
+  return useMemo(() => {
+    let tempMax = 0;
+    let tempMin = 600;
+
+    attackItems.forEach((item) => {
+      if (item.startTime > tempMax) tempMax = item.startTime;
+      const endTime =
+        item.startTime - item.allDelays[item.allDelays.length - 1];
+      if (endTime < tempMin) tempMin = endTime;
+    });
+
+    buffItems.forEach((item) => {
+      if (item.startTime > tempMax) tempMax = item.startTime;
+      const isChecked = checkedUE2[item.character] || false;
+      const endTime =
+        item.startTime -
+        item.delay -
+        item.duration * (isChecked ? defaultDurationMultiplier : 1);
+      if (endTime < tempMin) tempMin = endTime;
+    });
+
+    tempMax = Math.ceil(tempMax / 10) * 10;
+    tempMin = Math.max(Math.floor(tempMin / 10) * 10, 0);
+
+    if (tempMax > tempMin) {
+      return { maxTime: tempMax, minTime: tempMin };
+    }
+
+    return { maxTime: 600, minTime: 0 };
+  }, [attackItems, buffItems, checkedUE2]);
+};
