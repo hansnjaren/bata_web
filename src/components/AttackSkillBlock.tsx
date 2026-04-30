@@ -53,6 +53,10 @@ export function AttackSkillBlock({
 
   // 시간 입력(draft)
   const [draftTime, setDraftTime] = useState(() => secToTimeString(startTime));
+  
+  useEffect(() => {
+    setDraftTime(secToTimeString(startTime));
+  }, [startTime]);
 
   useEffect(() => {
     if (!isOpen) return;

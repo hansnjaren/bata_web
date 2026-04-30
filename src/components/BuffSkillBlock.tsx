@@ -57,6 +57,10 @@ export function BuffSkillBlock({
 
   // 입력(draft)
   const [draftTime, setDraftTime] = useState(() => secToTimeString(startTime));
+  
+  useEffect(() => {
+    setDraftTime(secToTimeString(startTime));
+  }, [startTime]);
 
   useEffect(() => {
     if (!isOpen) return;

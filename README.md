@@ -1,36 +1,20 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Blue Archive Tactic Analyzer Web Version
+기존에 개발하던 [BATA](https://github.com/hansnjaren/BlueArchiveTacticAnalyzer)에서 파이썬 스크립트로는 기능 추가에 한계가 있어 웹으로 이식한 프로젝트입니다. 
+활용 방법은 기존 BATA와 큰 틀에서 같으며, 현재는 택틱 시각화 및 택틱 수정 기능을 지원하고 있습니다. 
 
-## Getting Started
-
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 택틱 시각화 도구
+[Go to parser](https://hoshino-uhe.vercel.app/parseTimeline) 버튼을 누르면 진입할 수 있으며, 하단의 입력 칸에 택틱을 다음과 같은 형식으로 입력하면 택틱이 파싱되어 시각화됩니다. 
 ```
+03:45.333 (9.9코) 수로코>게부라
+```
+이때 시간, 캐릭터는 필수적으로 있어야 합니다. 
+대상은 >대상으로 지정 가능하며, 대상이 보스가 아닌 경우 (ex. 게부라의 빙산, 예로니무스의 성배 등) 시각화되지 않습니다. 
+또한 `(9.9코)`같이 부가 설명이 붙어있어도 동작하게 하였으나 예외가 있을 수는 있습니다. 
+예시처럼 `수로코`와 같은 이명이나 통상적으로 불리는 이름으로 적어도 인식 가능하게 데이터베이스가 구성되어 있습니다. 
+캐릭터 리스트에 전무 2성이 버프 지속 시간 증가인 학생은 체크박스가 나타나며, 체크 시 전무 2성 기준 버프 시간으로 표시됩니다. 
+실제 버프 적용 및 공격 시간은 클라이언트 상 실제 측정값을 기준으로 하여 측정된 학생만 데이터베이스에 존재합니다. 
+현재 `character.json`에 없는 학생의 정보가 있으면 PR을 부탁드립니다. 
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 택틱 수정 도구
+[Go to timeline editor](https://hoshino-uhe.vercel.app/tacticEditor) 버튼을 눌러서도 진입이 가능하나 여기서는 데이터 추가가 불가능한 관계로 먼저 시각화 도구에서 파싱을 한 후 Go to tactic editor with this data 버튼을 눌러서 진입해야 합니다. 
+해당 버튼을 누르면 시각화된 스킬들을 그대로 택틱 수정 도구로 들고 올 수 있으며, (1) 드래그, (2) 클릭해서 나오는 창에서 스킬 사용 시간을 직접 수정해서 택틱을 수정할 수 있습니다. 
