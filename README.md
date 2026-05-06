@@ -23,3 +23,6 @@
 
 [Go to timeline editor](https://hoshino-uhe.vercel.app/tacticEditor) 버튼을 눌러서도 진입이 가능하나 여기서는 데이터 추가가 불가능한 관계로 먼저 시각화 도구에서 파싱을 한 후 Go to tactic editor with this data 버튼을 눌러서 진입해야 합니다.
 해당 버튼을 누르면 시각화된 스킬들을 그대로 택틱 수정 도구로 들고 올 수 있으며, (1) 드래그, (2) 클릭해서 나오는 창에서 스킬 사용 시간을 직접 수정해서 택틱을 수정할 수 있습니다.
+
+## Known Issues
+- 택틱 수정 도구에서 툴팁으로도 시간 그래프에 표시되는 시간 밖으로 이동시킬 수 없는 문제

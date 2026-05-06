@@ -1,4 +1,10 @@
-@import "tailwindcss";
+@import "tailwindcss/theme" layer(theme);
+@import "tailwindcss/utilities" layer(utilities);
+@import "@neondatabase/auth/ui/tailwind";
+
+/* The @source inside auth/ui/tailwind may fail to resolve its relative path.
+   Explicitly tell Tailwind to scan the safelist so all auth component classes are generated. */
+@source "../../node_modules/@neondatabase/auth-ui/dist/.safelist.html";
 
 :root {
   --background: #ffffff;
@@ -12,15 +18,21 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  color-scheme: light !important;
 }
+
+@layer base {
+  button:not([class*="bg-"]):not([class*="underline"]) {
+    @apply px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium rounded-md border border-blue-200 transition-colors shadow-sm;
+  }
+
+  button[class*="underline"] {
+    @apply bg-transparent border-none shadow-none cursor-pointer;
+  }
+}
+
+
