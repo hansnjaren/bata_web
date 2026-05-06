@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import React, { useEffect, useState } from "react";
 import { timeZoneNumMin, widthMultMin } from "../constants/sizes";
@@ -46,7 +46,7 @@ function GoToButtonWithData({
   };
 
   const goToParser = () => {
-    sessionStorage.setItem('tacticEditorState', JSON.stringify(data));
+    sessionStorage.setItem("tacticEditorState", JSON.stringify(data));
     router.push(route);
   };
 

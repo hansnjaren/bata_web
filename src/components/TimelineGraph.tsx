@@ -79,7 +79,9 @@ function TimelineGraphInner({
   const [attack, setAttack] = useState<AttackSkill[]>(() =>
     cloneAttackItems(attackItems),
   );
-  const [buff, setBuff] = useState<BuffSkill[]>(() => cloneBuffItems(buffItems));
+  const [buff, setBuff] = useState<BuffSkill[]>(() =>
+    cloneBuffItems(buffItems),
+  );
 
   const resetData = () => {
     setAttack(cloneAttackItems(attackItems));
@@ -582,7 +584,9 @@ function TimelineGraphInner({
                       cand.type === item.type &&
                       cand.detail === item.detail,
                   )}
-                  isOpen={openTooltip?.type === "buff" && openTooltip.index === i}
+                  isOpen={
+                    openTooltip?.type === "buff" && openTooltip.index === i
+                  }
                   onHover={() => handleHover("buff", i)}
                   onLeave={() => handleLeave()}
                   onClick={() => handleClick("buff", i)}
@@ -598,9 +602,7 @@ function TimelineGraphInner({
           </div>
         </div>
 
-        {editable && (
-          <button onClick={resetData}>타임라인 초기화</button>
-        )}
+        {editable && <button onClick={resetData}>타임라인 초기화</button>}
       </div>
     </div>
   );

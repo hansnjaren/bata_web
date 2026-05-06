@@ -57,7 +57,7 @@ export function BuffSkillBlock({
 
   // 입력(draft)
   const [draftTime, setDraftTime] = useState(() => secToTimeString(startTime));
-  
+
   useEffect(() => {
     setDraftTime(secToTimeString(startTime));
   }, [startTime]);
@@ -87,10 +87,10 @@ export function BuffSkillBlock({
     tooltipEl.style.top = `${rect.bottom + window.scrollY}px`;
 
     if (clientWidth - rect.left < tooltipWidth) {
-      tooltipEl.style.left = 'auto';
+      tooltipEl.style.left = "auto";
       tooltipEl.style.right = `${clientWidth - rect.left}px`;
     } else {
-      tooltipEl.style.right = 'auto';
+      tooltipEl.style.right = "auto";
       tooltipEl.style.left = `${rect.left + window.scrollX}px`;
     }
   }, [isOpen, startTime]);

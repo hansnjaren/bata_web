@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter } from "next/navigation";
 
 function GoToButton({
   children,
@@ -13,7 +13,7 @@ function GoToButton({
 
   return (
     <button type="button" onClick={() => router.push(route)}>
-      {children || 'Click it!'}
+      {children || "Click it!"}
     </button>
   );
 }
@@ -23,14 +23,14 @@ export default function NavigationButtons() {
 
   return (
     <div>
-      {pathname !== '/' && <GoToButton route="/">Go to Home</GoToButton>}
-      {pathname !== '/parseTimeline' && (
+      {pathname !== "/" && <GoToButton route="/">Go to Home</GoToButton>}
+      {pathname !== "/parseTimeline" && (
         <GoToButton route="/parseTimeline">Go to parser</GoToButton>
       )}
-      {pathname !== '/tacticEditor' && (
+      {pathname !== "/tacticEditor" && (
         <GoToButton route="/tacticEditor">Go to timeline editor</GoToButton>
       )}
-      {pathname !== '/admin' && (
+      {pathname !== "/admin" && (
         <GoToButton route="/admin">Go to admin</GoToButton>
       )}
     </div>

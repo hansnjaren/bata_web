@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import RegexParser from "@/components/RegexParser";
 import Timeline from "@/components/Timeline";

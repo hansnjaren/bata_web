@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1778046439322,
+      "tag": "0000_vengeful_gateway",
+      "breakpoints": true
+    }
+  ]
+}

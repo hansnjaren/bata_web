@@ -53,7 +53,7 @@ export function AttackSkillBlock({
 
   // 시간 입력(draft)
   const [draftTime, setDraftTime] = useState(() => secToTimeString(startTime));
-  
+
   useEffect(() => {
     setDraftTime(secToTimeString(startTime));
   }, [startTime]);
@@ -73,7 +73,7 @@ export function AttackSkillBlock({
     // 입력창은 정규화된 mm:ss.000로 교체(스냅 전 값이므로 프레임 정렬은 TG가 책임)
     setDraftTime(r.normalized);
   };
-  
+
   useLayoutEffect(() => {
     if (!isOpen || !ref.current || !tooltipRef.current) return;
 
@@ -85,10 +85,10 @@ export function AttackSkillBlock({
     tooltipEl.style.top = `${rect.bottom + window.scrollY}px`;
 
     if (clientWidth - rect.left < tooltipWidth) {
-      tooltipEl.style.left = 'auto';
+      tooltipEl.style.left = "auto";
       tooltipEl.style.right = `${clientWidth - rect.left}px`;
     } else {
-      tooltipEl.style.right = 'auto';
+      tooltipEl.style.right = "auto";
       tooltipEl.style.left = `${rect.left + window.scrollX}px`;
     }
   }, [isOpen, startTime]);

@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Timeline from '@/components/Timeline';
-import { timeZoneNumMin, widthMultMin } from '@/constants/sizes';
-import { AttackSkill, BuffSkill } from '@/interfaces/timelineData';
+import { useState } from "react";
+import Timeline from "@/components/Timeline";
+import { timeZoneNumMin, widthMultMin } from "@/constants/sizes";
+import { AttackSkill, BuffSkill } from "@/interfaces/timelineData";
 
 type TacticEditorState = {
   filteredCharacterNames: string[];
@@ -24,9 +24,9 @@ const defaultState: TacticEditorState = {
 };
 
 function getInitialState(): TacticEditorState {
-  if (typeof window === 'undefined') return defaultState;
+  if (typeof window === "undefined") return defaultState;
 
-  const raw = sessionStorage.getItem('tacticEditorState');
+  const raw = sessionStorage.getItem("tacticEditorState");
   if (!raw) return defaultState;
 
   try {
