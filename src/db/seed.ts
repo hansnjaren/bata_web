@@ -1,8 +1,8 @@
 // src/db/seed.ts
 import { db } from "./index"; // db 연결 객체 (경로 확인 필요)
 import { characters, skills, enemies } from "./schema";
-import characterData from "../../public/data/character.json"; // JSON 파일 불러오기
-import enemyList from "../../public/data/enemy.json"; // ["Enemy1", "Enemy2", ...]
+import characterData from "../../public/data_deprecated/character.json"; // JSON 파일 불러오기
+import enemyList from "../../public/data_deprecated/enemy.json"; // ["Enemy1", "Enemy2", ...]
 
 async function seedCharacters() {
   console.log("데이터 마이그레이션 시작...");
@@ -10,7 +10,6 @@ async function seedCharacters() {
   // transaction을 쓰면 중간에 에러가 나도 이전 상태로 롤백(복구)해 줍니다. (안전함)
   await db.transaction(async (tx) => {
     for (const charItem of characterData) {
-      
       // 1. 캐릭터 먼저 Insert 하고, 생성된 ID 값 받아오기 (.returning() 활용)
       const [insertedChar] = await tx
         .insert(characters)
@@ -25,7 +24,6 @@ async function seedCharacters() {
 
       // 2. 캐릭터에 속한 스킬 리스트가 있다면?
       if (charItem.skills && charItem.skills.length > 0) {
-        
         // 3. 스킬 데이터에 방금 발급받은 characterId를 끼워 넣기
         const skillsToInsert = charItem.skills.map((skill) => ({
           characterId: newCharacterId, // 👈 받아온 부모 ID를 여기에 쏙!
@@ -39,7 +37,7 @@ async function seedCharacters() {
         // 4. 스킬들을 한 번에 Insert (Bulk Insert)
         await tx.insert(skills).values(skillsToInsert);
       }
-      
+
       console.log(`${charItem.name} 저장 완료!`);
     }
   });
@@ -54,16 +52,14 @@ async function seedEnemies() {
   }));
 
   // 2. 한 번에 삽입 (Bulk Insert)
-  await db.insert(enemies).values(dataToInsert).onConflictDoNothing(); 
+  await db.insert(enemies).values(dataToInsert).onConflictDoNothing();
   // .onConflictDoNothing()을 붙이면 이미 있는 이름일 경우 에러 없이 넘어갑니다.
 }
-
 
 // 스크립트 실행
 seedCharacters().catch((err) => {
   console.error("seedCharacters 에러 발생:", err);
 });
-
 
 seedEnemies().catch((err) => {
   console.error("seedEnemies 에러 발생:", err);
