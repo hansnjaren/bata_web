@@ -1,0 +1,33 @@
+import { NextResponse } from 'next/server';
+import { db } from '@/db';
+import { characters } from '@/db/schema'; // schema.ts에서 정의한 테이블 객체
+
+// 1. 데이터 읽기 (Read)
+export async function GET() {
+  try {
+    const allCharacters = await db.select().from(characters);
+    return NextResponse.json(allCharacters);
+  } catch (error: any) {
+    console.error("Characters GET Error:", error);
+    return NextResponse.json({ error: error.message || String(error) }, { status: 500 });
+  }
+}
+
+// 2. 데이터 쓰기 (Create)
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+    
+    // Drizzle을 사용한 Insert
+    const newPost = await db.insert(characters).values({
+      id: body.id, 
+      name: body.name, 
+      alias: body.alias, 
+      ue2: body.ue2, 
+    }).returning(); // 삽입된 데이터를 바로 반환받고 싶을 때
+
+    return NextResponse.json(newPost, { status: 201 });
+  } catch (error) {
+    return NextResponse.json({ error: "데이터 저장에 실패했습니다." }, { status: 400 });
+  }
+}

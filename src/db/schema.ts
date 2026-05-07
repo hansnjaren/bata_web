@@ -242,16 +242,14 @@ export const projectConfigInNeonAuth = neonAuth.table(
 );
 
 export const characters = pgTable(
-  "character",
+  "characters",
   {
     id: serial("id").primaryKey(),
     name: text("name").notNull(),
     alias: text("alias").array().notNull().default([]),
     ue2: boolean("ue2").notNull().default(false),
   },
-  (table) => [
-    unique("character_name_unique").on(table.name),
-  ],
+  (table) => [unique("character_name_unique").on(table.name)],
 );
 
 export const skills = pgTable(
@@ -267,9 +265,7 @@ export const skills = pgTable(
     delays: doublePrecision("delays").array().notNull().default([]),
     duration: doublePrecision("duration").notNull().default(0),
   },
-  (table) => [
-    index("character_id_idx").on(table.characterId),
-  ],
+  (table) => [index("character_id_idx").on(table.characterId)],
 );
 
 export const enemies = pgTable("enemies", {

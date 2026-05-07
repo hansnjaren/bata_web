@@ -1,6 +1,6 @@
 "use client";
 
-import { AuthView } from "@neondatabase/auth/react";
+import { AuthView, AuthViewPaths } from "@neondatabase/auth/react";
 import { use } from "react";
 
 export default function AuthPage({
@@ -10,7 +10,7 @@ export default function AuthPage({
 }) {
   const resolvedParams = use(params);
   const path = resolvedParams.path?.[0] || "sign-in";
-  const view = path.replace(/-/g, "_").toUpperCase() as any;
+  const view = path.replace(/-/g, "_").toUpperCase() as keyof AuthViewPaths;
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-gray-50">

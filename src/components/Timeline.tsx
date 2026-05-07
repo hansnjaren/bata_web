@@ -96,18 +96,41 @@ export default function Timeline({
   useEffect(() => {
     async function fetchData() {
       try {
-        const [chrRes, enmRes] = await Promise.all([
-          fetch("/data/character.json"),
-          fetch("/data/enemy.json"),
+        const [chrRes, enmRes, skillRes] = await Promise.all([
+          fetch("/api/characters"),
+          fetch("/api/enemies"),
+          fetch("/api/skills"),
         ]);
 
-        const [chrData, enmData] = await Promise.all([
+        if (!chrRes.ok) throw new Error(await chrRes.text());
+        if (!enmRes.ok) throw new Error(await enmRes.text());
+        if (!skillRes.ok) throw new Error(await skillRes.text());
+
+        const [chrDataRaw, enmDataRaw, skillDataRaw] = await Promise.all([
           chrRes.json(),
           enmRes.json(),
+          skillRes.json(),
         ]);
 
-        setCharacters(chrData);
-        setEnemies(enmData);
+        const combinedCharacters: Character[] = chrDataRaw.map((chr: any) => ({
+          name: chr.name,
+          alias: chr.alias || [],
+          UE2: chr.ue2 || false,
+          skills: skillDataRaw
+            .filter((s: any) => s.characterId === chr.id)
+            .map((s: any) => ({
+              type: s.type,
+              alias: s.alias || [],
+              role: s.role || [],
+              delays: s.delays || [],
+              duration: s.duration || 0,
+            })),
+        }));
+
+        const enemiesList = enmDataRaw.map((e: any) => e.name);
+
+        setCharacters(combinedCharacters);
+        setEnemies(enemiesList);
       } catch (e) {
         console.error("Failed to load data", e);
       }
