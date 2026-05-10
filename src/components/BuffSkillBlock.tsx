@@ -105,7 +105,7 @@ export function BuffSkillBlock({
           width: `${(widthMult * (delay + exactDuration) * 100) / (maxTime - minTime)}%`,
           top: defaultHeight * index,
           height: defaultHeight,
-          borderLeft: "1px solid red",
+          borderLeft: "1px solid var(--buff-edge)",
           cursor: editable ? "ew-resize" : "pointer",
           touchAction: editable ? "none" : "auto",
         }}
@@ -160,9 +160,9 @@ export function BuffSkillBlock({
               left: `${(delay * 100) / (delay + exactDuration)}%`,
               width: `${(exactDuration * 100) / (delay + exactDuration)}%`,
               height: "100%",
-              borderLeft: "1px solid black",
-              borderRight: "1px solid black",
-              backgroundColor: "#0000ff33",
+              borderLeft: "1px solid var(--line-color)",
+              borderRight: "1px solid var(--line-color)",
+              backgroundColor: "var(--buff-bg)",
             }}
           />
         </div>
@@ -174,8 +174,8 @@ export function BuffSkillBlock({
             ref={tooltipRef}
             style={{
               position: "absolute",
-              border: "1px solid black",
-              background: "white",
+              border: "1px solid var(--tooltip-border)",
+              background: "var(--tooltip-bg)",
               padding: 4,
               zIndex: 1000,
               pointerEvents: "auto",

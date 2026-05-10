@@ -26,6 +26,7 @@ type TimelineGraphProps = {
   attackItems: AttackSkill[];
   buffItems: BuffSkill[];
   checkedUE2: Record<string, boolean>;
+  checkedShowAttack: Record<string, boolean>;
   widthMult: number;
   timeZoneNum: number;
   editable: boolean;
@@ -72,6 +73,7 @@ function TimelineGraphInner({
   attackItems,
   buffItems,
   checkedUE2,
+  checkedShowAttack,
   widthMult,
   timeZoneNum,
   editable,
@@ -113,10 +115,6 @@ function TimelineGraphInner({
 
   const handleHover = (type: ItemType, index: number) => {
     if (clickLock === null) setOpenTooltip({ type, index });
-    else if (clickLock.type !== type || clickLock.index !== index) {
-      setClickLock(null);
-      setOpenTooltip({ type, index });
-    }
   };
 
   const handleLeave = () => {
@@ -205,8 +203,7 @@ function TimelineGraphInner({
 
   const applyDragDeltaToCtx = (ctx: DragCtx, deltaSec: number) => {
     const target = ctx.baseStartTime + deltaSec;
-    const clampedTarget = clamp(snapToFrame(target), minTime, maxTime);
-    const actualDelta = clampedTarget - ctx.baseStartTime;
+    const actualDelta = snapToFrame(target) - ctx.baseStartTime;
 
     setAttack((prev) => {
       const keys = Object.keys(ctx.attackBases);
@@ -222,7 +219,7 @@ function TimelineGraphInner({
         if (!it) continue;
 
         changed = true;
-        const moved = clamp(snapToFrame(base + actualDelta), minTime, maxTime);
+        const moved = snapToFrame(base + actualDelta);
         next[i] = { ...it, startTime: moved };
       }
 
@@ -243,7 +240,7 @@ function TimelineGraphInner({
         if (!it) continue;
 
         changed = true;
-        const moved = clamp(snapToFrame(base + actualDelta), minTime, maxTime);
+        const moved = snapToFrame(base + actualDelta);
         next[i] = { ...it, startTime: moved };
       }
 
@@ -305,8 +302,7 @@ function TimelineGraphInner({
     };
 
     const snapped = snapToFrame(newStartTimeSec);
-    const clampedTarget = clamp(snapped, minTime, maxTime);
-    const actualDelta = clampedTarget - baseStartTime;
+    const actualDelta = snapped - baseStartTime;
 
     setAttack((prev) => {
       const keys = Object.keys(ctx.attackBases);
@@ -322,7 +318,7 @@ function TimelineGraphInner({
         if (!it) continue;
 
         changed = true;
-        const moved = clamp(snapToFrame(base + actualDelta), minTime, maxTime);
+        const moved = snapToFrame(base + actualDelta);
         next[i] = { ...it, startTime: moved };
       }
 
@@ -343,7 +339,7 @@ function TimelineGraphInner({
         if (!it) continue;
 
         changed = true;
-        const moved = clamp(snapToFrame(base + actualDelta), minTime, maxTime);
+        const moved = snapToFrame(base + actualDelta);
         next[i] = { ...it, startTime: moved };
       }
 
@@ -385,8 +381,7 @@ function TimelineGraphInner({
     };
 
     const snapped = snapToFrame(newStartTimeSec);
-    const clampedTarget = clamp(snapped, minTime, maxTime);
-    const actualDelta = clampedTarget - baseStartTime;
+    const actualDelta = snapped - baseStartTime;
 
     setAttack((prev) => {
       const keys = Object.keys(ctx.attackBases);
@@ -402,7 +397,7 @@ function TimelineGraphInner({
         if (!it) continue;
 
         changed = true;
-        const moved = clamp(snapToFrame(base + actualDelta), minTime, maxTime);
+        const moved = snapToFrame(base + actualDelta);
         next[i] = { ...it, startTime: moved };
       }
 
@@ -423,7 +418,7 @@ function TimelineGraphInner({
         if (!it) continue;
 
         changed = true;
-        const moved = clamp(snapToFrame(base + actualDelta), minTime, maxTime);
+        const moved = snapToFrame(base + actualDelta);
         next[i] = { ...it, startTime: moved };
       }
 
@@ -446,7 +441,7 @@ function TimelineGraphInner({
             display: "flex",
             justifyContent: "space-between",
             width: "100%",
-            borderBottom: "1px solid black",
+            borderBottom: "1px solid var(--line-color)",
           }}
         >
           <div style={{ display: "inline-block" }}>
@@ -488,7 +483,7 @@ function TimelineGraphInner({
                 position: "absolute",
                 width: `${(viewportWidthPx * i) / timeZoneNum}px`,
                 height: `${defaultHeight * skillTypes.length}px`,
-                borderRight: "1px solid gray",
+                borderRight: "1px solid var(--grid-line-color)",
                 zIndex: -2,
               }}
             />
@@ -509,8 +504,8 @@ function TimelineGraphInner({
                 height: `${defaultHeight}px`,
                 width: `${viewportWidthPx}px`,
                 boxSizing: "border-box",
-                borderBottom: "1px solid black",
-                borderRight: "1px solid black",
+                borderBottom: "1px solid var(--line-color)",
+                borderRight: "1px solid var(--line-color)",
                 backgroundColor: "transparent",
               }}
             >
@@ -539,6 +534,35 @@ function TimelineGraphInner({
                 overflow: "hidden",
               }}
             >
+              {buff.map((item, i) => (
+                <BuffSkillBlock
+                  key={`buff:${i}`}
+                  item={item}
+                  maxTime={maxTime}
+                  minTime={minTime}
+                  widthMult={widthMult}
+                  checkedUE2={checkedUE2}
+                  index={skillTypes.findIndex(
+                    (cand) =>
+                      cand.character === item.character &&
+                      cand.type === item.type &&
+                      cand.detail === item.detail,
+                  )}
+                  isOpen={
+                    openTooltip?.type === "buff" && openTooltip.index === i
+                  }
+                  onHover={() => handleHover("buff", i)}
+                  onLeave={() => handleLeave()}
+                  onClick={() => handleClick("buff", i)}
+                  editable={editable}
+                  onDragStart={() => handleDragStart("buff", i)}
+                  onDragMove={(dxPx) => handleDragMove("buff", i, dxPx)}
+                  onDragEnd={() => handleDragEnd("buff", i)}
+                  onCommitStartTime={(newSec) => commitBuffStartTime(i, newSec)}
+                  getResetDraftValue={() => getBuffStartTimeStr(i)}
+                />
+              ))}
+
               {attack.map((item, i) => (
                 <AttackSkillBlock
                   key={`attack:${i}`}
@@ -567,35 +591,7 @@ function TimelineGraphInner({
                     commitAttackStartTime(i, newSec)
                   }
                   getResetDraftValue={() => getAttackStartTimeStr(i)}
-                />
-              ))}
-
-              {buff.map((item, i) => (
-                <BuffSkillBlock
-                  key={`buff:${i}`}
-                  item={item}
-                  maxTime={maxTime}
-                  minTime={minTime}
-                  widthMult={widthMult}
-                  checkedUE2={checkedUE2}
-                  index={skillTypes.findIndex(
-                    (cand) =>
-                      cand.character === item.character &&
-                      cand.type === item.type &&
-                      cand.detail === item.detail,
-                  )}
-                  isOpen={
-                    openTooltip?.type === "buff" && openTooltip.index === i
-                  }
-                  onHover={() => handleHover("buff", i)}
-                  onLeave={() => handleLeave()}
-                  onClick={() => handleClick("buff", i)}
-                  editable={editable}
-                  onDragStart={() => handleDragStart("buff", i)}
-                  onDragMove={(dxPx) => handleDragMove("buff", i, dxPx)}
-                  onDragEnd={() => handleDragEnd("buff", i)}
-                  onCommitStartTime={(newSec) => commitBuffStartTime(i, newSec)}
-                  getResetDraftValue={() => getBuffStartTimeStr(i)}
+                  showAttackLine={checkedShowAttack[item.character] !== false}
                 />
               ))}
             </div>

@@ -10,6 +10,7 @@ type TacticEditorState = {
   attackItems: AttackSkill[];
   buffItems: BuffSkill[];
   checkedUE2: Record<string, boolean>;
+  checkedShowAttack: Record<string, boolean>;
   widthMult: number;
   timeZoneNum: number;
 };
@@ -19,6 +20,7 @@ const defaultState: TacticEditorState = {
   attackItems: [],
   buffItems: [],
   checkedUE2: {},
+  checkedShowAttack: {},
   widthMult: widthMultMin,
   timeZoneNum: timeZoneNumMin,
 };
@@ -36,6 +38,7 @@ function getInitialState(): TacticEditorState {
       attackItems: parsed.attackItems ?? [],
       buffItems: parsed.buffItems ?? [],
       checkedUE2: parsed.checkedUE2 ?? {},
+      checkedShowAttack: parsed.checkedShowAttack ?? {},
       widthMult: parsed.widthMult ?? widthMultMin,
       timeZoneNum: parsed.timeZoneNum ?? timeZoneNumMin,
     };
@@ -55,6 +58,7 @@ export default function TacticEditor() {
         sentAttackItems={state.attackItems}
         sentBuffItems={state.buffItems}
         sentCheckedUE2={state.checkedUE2}
+        sentCheckedShowAttack={state.checkedShowAttack}
         sentWidthMult={state.widthMult}
         sentTimeZoneNum={state.timeZoneNum}
       />

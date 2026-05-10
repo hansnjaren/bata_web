@@ -54,6 +54,7 @@ export interface TimelineProps {
   sentAttackItems?: AttackSkill[];
   sentBuffItems?: BuffSkill[];
   sentCheckedUE2?: Record<string, boolean>;
+  sentCheckedShowAttack?: Record<string, boolean>;
   sentWidthMult?: number;
   sentTimeZoneNum?: number;
 }

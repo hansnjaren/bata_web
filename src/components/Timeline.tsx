@@ -22,6 +22,7 @@ function GoToButtonWithData({
   attackItems,
   buffItems,
   checkedUE2,
+  checkedShowAttack,
   widthMult,
   timeZoneNum,
 }: {
@@ -31,6 +32,7 @@ function GoToButtonWithData({
   attackItems: AttackSkill[];
   buffItems: BuffSkill[];
   checkedUE2: Record<string, boolean>;
+  checkedShowAttack: Record<string, boolean>;
   widthMult: number;
   timeZoneNum: number;
 }) {
@@ -41,6 +43,7 @@ function GoToButtonWithData({
     attackItems,
     buffItems,
     checkedUE2,
+    checkedShowAttack,
     widthMult,
     timeZoneNum,
   };
@@ -86,6 +89,7 @@ export default function Timeline({
   sentAttackItems,
   sentBuffItems,
   sentCheckedUE2,
+  sentCheckedShowAttack,
   sentWidthMult,
   sentTimeZoneNum,
 }: TimelineProps) {
@@ -222,8 +226,19 @@ export default function Timeline({
     sentCheckedUE2 ? sentCheckedUE2 : {},
   );
 
+  const [checkedShowAttack, setCheckedShowAttack] = React.useState<Record<string, boolean>>(
+    sentCheckedShowAttack ? sentCheckedShowAttack : {},
+  );
+
   const handleCheckboxChange = (name: string) => {
     setCheckedUE2((prev) => ({ ...prev, [name]: !prev[name] }));
+  };
+
+  const handleShowAttackChange = (name: string) => {
+    setCheckedShowAttack((prev) => ({
+      ...prev,
+      [name]: prev[name] === false ? true : false,
+    }));
   };
 
   const defaultWidthMult = sentWidthMult ? sentWidthMult : widthMultMin;
@@ -272,6 +287,7 @@ export default function Timeline({
         attackItems={attackItems}
         buffItems={buffItems}
         checkedUE2={checkedUE2}
+        checkedShowAttack={checkedShowAttack}
         widthMult={widthMult}
         timeZoneNum={timeZoneNum}
         editable={editable}
@@ -300,6 +316,8 @@ export default function Timeline({
       {filteredCharacters.map((name) => {
         const chr = characters.find((c) => c.name === name);
         const isChecked = chr?.UE2 && checkedUE2[name];
+        const hasAttackSkill = attackItems.some((item) => item.character === name);
+        const isShowAttackChecked = checkedShowAttack[name] !== false;
 
         return (
           <div
@@ -318,21 +336,35 @@ export default function Timeline({
                 <div>전무 2성 여부</div>
               </>
             )}
+            {hasAttackSkill && (
+              <>
+                <input
+                  type="checkbox"
+                  checked={isShowAttackChecked}
+                  onChange={() => handleShowAttackChange(name)}
+                  style={{ marginLeft: 10, marginRight: 4 }}
+                />
+                <div>공격 시점 보기</div>
+              </>
+            )}
           </div>
         );
       })}
       {location === "/parseTimeline" && (
-        <GoToButtonWithData
-          route="/tacticEditor"
-          filteredCharacterNames={filteredCharacters}
-          attackItems={attackItems}
-          buffItems={buffItems}
-          checkedUE2={checkedUE2}
-          widthMult={widthMult}
-          timeZoneNum={timeZoneNum}
-        >
-          Go to tactic editor with this data
-        </GoToButtonWithData>
+        <div className="mt-4 mb-4">
+          <GoToButtonWithData
+            route="/tacticEditor"
+            filteredCharacterNames={filteredCharacters}
+            attackItems={attackItems}
+            buffItems={buffItems}
+            checkedUE2={checkedUE2}
+            checkedShowAttack={checkedShowAttack}
+            widthMult={widthMult}
+            timeZoneNum={timeZoneNum}
+          >
+            Go to tactic editor with this data
+          </GoToButtonWithData>
+        </div>
       )}
     </div>
   );

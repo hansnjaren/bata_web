@@ -23,6 +23,7 @@ interface AttackSkillBlockProps {
 
   onCommitStartTime: (newStartTimeSec: number) => void;
   getResetDraftValue: () => string;
+  showAttackLine: boolean;
 }
 
 export function AttackSkillBlock({
@@ -42,6 +43,7 @@ export function AttackSkillBlock({
   onDragEnd,
   onCommitStartTime,
   getResetDraftValue,
+  showAttackLine,
 }: AttackSkillBlockProps) {
   const { startTime, character, allDelays } = item;
 
@@ -103,8 +105,6 @@ export function AttackSkillBlock({
           width: `${(widthMult * allDelays[allDelays.length - 1] * 100) / (maxTime - minTime)}%`,
           top: defaultHeight * index,
           height: defaultHeight,
-          borderLeft: "1px solid black",
-          backgroundColor: "#ff000033",
           cursor: editable ? "ew-resize" : "pointer",
           touchAction: editable ? "none" : "auto",
         }}
@@ -155,19 +155,39 @@ export function AttackSkillBlock({
         }}
       >
         <div style={{ position: "relative", width: "100%", height: "100%" }}>
-          {allDelays.map((delay: number, i: number) => (
-            <div
-              key={i}
-              style={{
-                position: "absolute",
-                top: -defaultHeight * index,
-                width: `${(delay * 100) / allDelays[allDelays.length - 1]}%`,
-                height: defaultHeight * totalItems,
-                borderRight: "1px solid black",
-                zIndex: -1,
-              }}
-            />
-          ))}
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              width: "calc(100% + 1px)", // 1px 확장으로 다른 블럭과의 렌더링 틈(gap) 메우기
+              backgroundColor: "var(--attack-bg)",
+              borderLeft: "1px solid var(--line-color)",
+              borderRight: showAttackLine
+                ? "none"
+                : "1px solid var(--line-color)",
+              boxSizing: "border-box",
+            }}
+          />
+          {showAttackLine &&
+            allDelays.map((delay: number, i: number) => {
+              const isLast = i === allDelays.length - 1;
+              return (
+                <div
+                  key={i}
+                  style={{
+                    position: "absolute",
+                    top: -defaultHeight * index,
+                    width: isLast
+                      ? "calc(100% + 1px)"
+                      : `${(delay * 100) / allDelays[allDelays.length - 1]}%`,
+                    height: defaultHeight * totalItems,
+                    borderRight: "1px solid var(--line-color)",
+                    boxSizing: "border-box",
+                    zIndex: -1,
+                  }}
+                />
+              );
+            })}
         </div>
       </div>
 
@@ -177,8 +197,8 @@ export function AttackSkillBlock({
             ref={tooltipRef}
             style={{
               position: "absolute",
-              border: "1px solid black",
-              background: "white",
+              border: "1px solid var(--tooltip-border)",
+              background: "var(--tooltip-bg)",
               padding: 4,
               zIndex: 1000,
               pointerEvents: "auto",
