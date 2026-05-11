@@ -1,11 +1,5 @@
-import Admin from "@/components/Admin";
-import { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Admin",
-  description: "Admin page",
-};
+import { redirect } from "next/navigation";
 
 export default function Page() {
-  return <Admin />;
+  redirect("/admin/characters");
 }
