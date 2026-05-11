@@ -94,8 +94,13 @@ export default function CharactersAdmin() {
       if (!res.ok) throw new Error("Save failed");
       setStatusMsg("✅ 캐릭터 저장 완료");
       await fetchData();
-    } catch (e: any) {
-      setStatusMsg("❌ 저장 실패: " + e.message);
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        setStatusMsg("❌ 캐릭터 저장 실패: " + e.message);
+      }
+      else {
+        setStatusMsg("❌ 캐릭터 저장 실패: 알 수 없는 에러");
+      }
     } finally {
       setSaving(false);
     }
@@ -116,8 +121,13 @@ export default function CharactersAdmin() {
       await fetchData();
       selectCharacter(newChar.id);
       setStatusMsg("✅ 캐릭터 추가 완료");
-    } catch (e: any) {
-      setStatusMsg("❌ 추가 실패: " + e.message);
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        setStatusMsg("❌ 캐릭터 추가 실패: " + e.message);
+      }
+      else {
+        setStatusMsg("❌ 캐릭터 추가 실패: 알 수 없는 에러");
+      }
     }
   };
 
@@ -138,8 +148,13 @@ export default function CharactersAdmin() {
       setSelectedId(null);
       setStatusMsg("✅ 캐릭터 삭제 완료");
       await fetchData();
-    } catch (e: any) {
-      setStatusMsg("❌ 삭제 실패: " + e.message);
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        setStatusMsg("❌ 캐릭터 삭제 실패: " + e.message);
+      }
+      else {
+        setStatusMsg("❌ 캐릭터 삭제 실패: 알 수 없는 에러");
+      }
     }
   };
 
@@ -162,8 +177,13 @@ export default function CharactersAdmin() {
       if (!res.ok) throw new Error("Add skill failed");
       setStatusMsg("✅ 스킬 추가 완료");
       await fetchData();
-    } catch (e: any) {
-      setStatusMsg("❌ 스킬 추가 실패: " + e.message);
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        setStatusMsg("❌ 스킬 추가 실패: " + e.message);
+      }
+      else {
+        setStatusMsg("❌ 스킬 추가 실패: 알 수 없는 에러");
+      }
     }
   };
 
@@ -175,8 +195,13 @@ export default function CharactersAdmin() {
       if (!res.ok) throw new Error("Delete skill failed");
       setStatusMsg("✅ 스킬 삭제 완료");
       await fetchData();
-    } catch (e: any) {
-      setStatusMsg("❌ 스킬 삭제 실패: " + e.message);
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        setStatusMsg("❌ 스킬 삭제 실패: " + e.message);
+      }
+      else {
+        setStatusMsg("❌ 스킬 삭제 실패: 알 수 없는 에러");
+      }
     }
   };
 
@@ -191,8 +216,13 @@ export default function CharactersAdmin() {
       if (!res.ok) throw new Error("Save skill failed");
       setStatusMsg("✅ 스킬 저장 완료");
       await fetchData();
-    } catch (e: any) {
-      setStatusMsg("❌ 스킬 저장 실패: " + e.message);
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        setStatusMsg("❌ 스킬 저장 실패: " + e.message);
+      }
+      else {
+        setStatusMsg("❌ 스킬 저장 실패: 알 수 없는 에러");
+      }
     }
   };
 
@@ -208,8 +238,8 @@ export default function CharactersAdmin() {
   return (
     <div className="flex h-full">
       {/* ── Left: Character list ── */}
-      <div className="w-72 border-r border-gray-200 dark:border-gray-700 flex flex-col">
-        <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+      <div className="w-56 border-r border-gray-200 dark:border-gray-700 flex flex-col">
+        <div className="px-4 h-16 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
           <h3 className="text-lg font-bold">캐릭터 목록</h3>
           <button
             onClick={addCharacter}
@@ -223,13 +253,13 @@ export default function CharactersAdmin() {
             <div
               key={ch.id}
               onClick={() => selectCharacter(ch.id)}
-              className={`px-4 py-3 cursor-pointer border-b border-gray-100 dark:border-gray-800 transition-colors ${
+              className={`flex items-center px-4 h-12 cursor-pointer border-b border-gray-100 dark:border-gray-800 transition-colors ${
                 selectedId === ch.id
-                  ? "bg-blue-50 dark:bg-blue-900/40 border-l-4 border-l-blue-500"
-                  : "hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                  ? "bg-blue-50 dark:bg-blue-900/40 border-l-4 border-l-blue-500 font-bold"
+                  : "hover:bg-gray-50 dark:hover:bg-gray-800/50 font-medium"
               }`}
             >
-              <span className="font-medium">{ch.name}</span>
+              {ch.name}
             </div>
           ))}
           {characters.length === 0 && (
@@ -287,7 +317,7 @@ export default function CharactersAdmin() {
             {/* ── Alias ── */}
             <section>
               <label className="block text-sm font-semibold mb-1 opacity-70">
-                별명 (alias)
+                별명
               </label>
               <DynamicAliasInput aliases={editAlias} onChange={setEditAlias} />
             </section>
@@ -302,7 +332,7 @@ export default function CharactersAdmin() {
                   onChange={(e) => setEditUe2(e.target.checked)}
                 />
                 <span className="text-sm font-semibold opacity-70">
-                  전무 2성 지속 시간 (UE2)
+                  전무 2성 지속 시간 증가 여부
                 </span>
               </label>
             </section>

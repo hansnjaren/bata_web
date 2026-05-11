@@ -10,8 +10,6 @@ import { BuffSkillBlock } from "./BuffSkillBlock";
 
 const FPS = 30;
 const snapToFrame = (sec: number) => Math.round(sec * FPS) / FPS;
-const clamp = (v: number, lo: number, hi: number) =>
-  Math.min(hi, Math.max(lo, v));
 const toFrame = (sec: number) => Math.round(sec * FPS);
 
 type DragCtx = {

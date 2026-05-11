@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import DynamicAliasInput from "./DynamicAliasInput";
 
 /* ──────────────────── Types ──────────────────── */
@@ -33,14 +33,25 @@ export default function SkillEditor({ skill, onSave, onDelete }: SkillEditorProp
   const [duration, setDuration] = useState(skill.duration ? String(skill.duration) : "");
 
   /* ──── Sync hitCount → delays length ──── */
-  useEffect(() => {
-    const count = Math.max(1, hitCount);
+  // useEffect(() => {
+  //   const count = Math.max(1, hitCount);
+  //   setDelays((prev) => {
+  //     const newArr = [...prev];
+  //     while (newArr.length < count) newArr.push("");
+  //     return newArr.slice(0, count);
+  //   });
+  // }, [hitCount]);
+
+  const handleHitCountChange = (newCount: number) => {
+    setHitCount(newCount);
+    
+    const count = Math.max(1, newCount);
     setDelays((prev) => {
       const newArr = [...prev];
       while (newArr.length < count) newArr.push("");
       return newArr.slice(0, count);
     });
-  }, [hitCount]);
+  };
 
   /* ──── Build role array from toggles ──── */
   const buildRole = (): string[] => {
@@ -81,7 +92,13 @@ export default function SkillEditor({ skill, onSave, onDelete }: SkillEditorProp
     <div className="border rounded-lg p-5 space-y-4 bg-gray-50 dark:bg-gray-800/50">
       {/* ── Header ── */}
       <div className="flex items-center justify-between">
-        <span className="text-sm font-mono opacity-40">Skill #{skill.id}</span>
+        <input
+          type="text"
+          className="w-1/2 border rounded-md px-3 py-2 bg-background text-foreground"
+          value={type}
+          onChange={(e) => setType(e.target.value)}
+          placeholder="EX, 1스, 2스 …"
+        />
         <button
           onClick={onDelete}
           className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 font-medium rounded-md border border-red-700 shadow-sm transition-colors"
@@ -90,27 +107,15 @@ export default function SkillEditor({ skill, onSave, onDelete }: SkillEditorProp
         </button>
       </div>
 
-      {/* ── Type ── */}
-      <div>
-        <label className="block text-sm font-semibold mb-1 opacity-70">종류 (type)</label>
-        <input
-          type="text"
-          className="w-full border rounded-md px-3 py-2 bg-background text-foreground"
-          value={type}
-          onChange={(e) => setType(e.target.value)}
-          placeholder="EX, NS, PS …"
-        />
-      </div>
-
       {/* ── Alias ── */}
       <div>
-        <label className="block text-sm font-semibold mb-1 opacity-70">별명 (alias)</label>
+        <label className="block text-sm font-semibold mb-1 opacity-70">별명</label>
         <DynamicAliasInput aliases={alias} onChange={setAlias} />
       </div>
 
       {/* ── Role toggles ── */}
       <div>
-        <label className="block text-sm font-semibold mb-2 opacity-70">역할 (role)</label>
+        <label className="block text-sm font-semibold mb-2 opacity-70">역할</label>
         <div className="flex gap-6">
           <label className="flex items-center gap-2 cursor-pointer">
             <input
@@ -119,7 +124,7 @@ export default function SkillEditor({ skill, onSave, onDelete }: SkillEditorProp
               checked={isAttack}
               onChange={(e) => setIsAttack(e.target.checked)}
             />
-            <span className="text-sm">Attack</span>
+            <span className="text-sm">공격</span>
           </label>
           <label className="flex items-center gap-2 cursor-pointer">
             <input
@@ -128,7 +133,7 @@ export default function SkillEditor({ skill, onSave, onDelete }: SkillEditorProp
               checked={isSupport}
               onChange={(e) => setIsSupport(e.target.checked)}
             />
-            <span className="text-sm">Support</span>
+            <span className="text-sm">버프/디버프</span>
           </label>
         </div>
       </div>
@@ -143,7 +148,7 @@ export default function SkillEditor({ skill, onSave, onDelete }: SkillEditorProp
               className="w-24 border rounded-md px-3 py-1 bg-background text-foreground"
               min={1}
               value={hitCount}
-              onChange={(e) => setHitCount(Math.max(1, parseInt(e.target.value) || 1))}
+              onChange={(e) => handleHitCountChange(Math.max(1, parseInt(e.target.value) || 1))}
             />
           </div>
           <div>
@@ -153,8 +158,8 @@ export default function SkillEditor({ skill, onSave, onDelete }: SkillEditorProp
                 <input
                   key={i}
                   type="number"
-                  step="any"
-                  className={`w-24 border rounded-md px-3 py-1 bg-background text-foreground ${
+                  step="1/30"
+                  className={`w-20 border rounded-md px-3 py-1 bg-background text-foreground ${
                     d.trim() === "" || isNaN(Number(d))
                       ? "border-red-400"
                       : "border-gray-300 dark:border-gray-600"
@@ -176,7 +181,7 @@ export default function SkillEditor({ skill, onSave, onDelete }: SkillEditorProp
       {/* ── Support: duration ── */}
       {isSupport && (
         <div className="pl-4 border-l-4 border-blue-400 space-y-2">
-          <label className="block text-sm font-semibold mb-1 opacity-70">Duration</label>
+          <label className="block text-sm font-semibold mb-1 opacity-70">지속시간</label>
           <input
             type="number"
             step="any"

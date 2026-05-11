@@ -31,7 +31,7 @@ export default function DynamicAliasInput({ aliases, onChange }: DynamicAliasInp
         <input
           key={index}
           type="text"
-          className="border rounded-md px-3 py-1 bg-background text-foreground"
+          className="border rounded-md px-3 py-2 bg-background text-foreground"
           placeholder="별명 입력"
           value={alias}
           onChange={(e) => handleChange(index, e.target.value)}

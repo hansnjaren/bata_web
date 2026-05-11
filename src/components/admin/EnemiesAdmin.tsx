@@ -62,8 +62,13 @@ export default function EnemiesAdmin() {
       if (!res.ok) throw new Error("Save failed");
       setStatusMsg("✅ 저장 완료");
       await fetchData();
-    } catch (e: any) {
-      setStatusMsg("❌ 저장 실패: " + e.message);
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        setStatusMsg("❌ 저장 실패: " + e.message);
+      }
+      else {
+        setStatusMsg("❌ 저장 실패: 알 수 없는 에러");
+      }
     } finally {
       setSaving(false);
     }
@@ -84,8 +89,13 @@ export default function EnemiesAdmin() {
       await fetchData();
       selectEnemy(newEnemy.id);
       setStatusMsg("✅ 적 추가 완료");
-    } catch (e: any) {
-      setStatusMsg("❌ 추가 실패: " + e.message);
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        setStatusMsg("❌ 적 추가 실패: " + e.message);
+      }
+      else {
+        setStatusMsg("❌ 적 추가 실패: 알 수 없는 에러");
+      }
     }
   };
 
@@ -99,8 +109,13 @@ export default function EnemiesAdmin() {
       setSelectedId(null);
       setStatusMsg("✅ 적 삭제 완료");
       await fetchData();
-    } catch (e: any) {
-      setStatusMsg("❌ 삭제 실패: " + e.message);
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        setStatusMsg("❌ 적 삭제 실패: " + e.message);
+      }
+      else {
+        setStatusMsg("❌ 적 삭제 실패: 알 수 없는 에러");
+      }
     }
   };
 
@@ -116,10 +131,13 @@ export default function EnemiesAdmin() {
   return (
     <div className="flex h-full">
       {/* ── Left: Enemy list ── */}
-      <div className="w-72 border-r border-gray-200 dark:border-gray-700 flex flex-col">
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+      <div className="w-56 border-r border-gray-200 dark:border-gray-700 flex flex-col">
+        <div className="p-4 h-16 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
           <h3 className="text-lg font-bold">적 목록</h3>
-          <button onClick={addEnemy}>
+          <button 
+            onClick={addEnemy}
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 font-medium rounded-md border border-green-700 shadow-sm transition-colors"
+          >
             + 추가
           </button>
         </div>
@@ -128,13 +146,13 @@ export default function EnemiesAdmin() {
             <div
               key={en.id}
               onClick={() => selectEnemy(en.id)}
-              className={`px-4 py-3 cursor-pointer border-b border-gray-100 dark:border-gray-800 transition-colors ${
+              className={`flex items-center px-4 h-12 cursor-pointer border-b border-gray-100 dark:border-gray-800 transition-colors ${
                 selectedId === en.id
-                  ? "bg-blue-50 dark:bg-blue-900/40 border-l-4 border-l-blue-500"
-                  : "hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                  ? "bg-blue-50 dark:bg-blue-900/40 border-l-4 border-l-blue-500 font-bold"
+                  : "hover:bg-gray-50 dark:hover:bg-gray-800/50 font-medium"
               }`}
             >
-              <span className="font-medium">{en.name}</span>
+              {en.name}
             </div>
           ))}
           {enemies.length === 0 && (

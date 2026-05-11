@@ -14,6 +14,7 @@ import { timeStringToSec } from "../utils/time";
 import { MultiplierInput } from "./MultiplierInput";
 import TimelineGraph from "./TimelineGraph";
 import { usePathname, useRouter } from "next/navigation";
+import { CharacterRaw, EnemyRaw, SkillRaw } from "@/db/schema";
 
 function GoToButtonWithData({
   children,
@@ -116,13 +117,13 @@ export default function Timeline({
           skillRes.json(),
         ]);
 
-        const combinedCharacters: Character[] = chrDataRaw.map((chr: any) => ({
+        const combinedCharacters: Character[] = chrDataRaw.map((chr: CharacterRaw) => ({
           name: chr.name,
           alias: chr.alias || [],
           UE2: chr.ue2 || false,
           skills: skillDataRaw
-            .filter((s: any) => s.characterId === chr.id)
-            .map((s: any) => ({
+            .filter((s: SkillRaw) => s.characterId === chr.id)
+            .map((s: SkillRaw) => ({
               type: s.type,
               alias: s.alias || [],
               role: s.role || [],
@@ -131,7 +132,7 @@ export default function Timeline({
             })),
         }));
 
-        const enemiesList = enmDataRaw.map((e: any) => e.name);
+        const enemiesList = enmDataRaw.map((e: EnemyRaw) => e.name);
 
         setCharacters(combinedCharacters);
         setEnemies(enemiesList);

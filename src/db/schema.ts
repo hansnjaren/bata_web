@@ -14,7 +14,7 @@ import {
   uniqueIndex,
   jsonb,
 } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
+import { InferSelectModel, sql } from "drizzle-orm";
 
 export const neonAuth = pgSchema("neon_auth");
 
@@ -252,6 +252,8 @@ export const characters = pgTable(
   (table) => [unique("character_name_unique").on(table.name)],
 );
 
+export type CharacterRaw = InferSelectModel<typeof characters>;
+
 export const skills = pgTable(
   "skills",
   {
@@ -268,7 +270,11 @@ export const skills = pgTable(
   (table) => [index("character_id_idx").on(table.characterId)],
 );
 
+export type SkillRaw = InferSelectModel<typeof skills>;
+
 export const enemies = pgTable("enemies", {
   id: serial("id").primaryKey(),
   name: text("name").notNull().unique(),
 });
+
+export type EnemyRaw = InferSelectModel<typeof enemies>;

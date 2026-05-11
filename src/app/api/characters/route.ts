@@ -7,12 +7,20 @@ export async function GET() {
   try {
     const allCharacters = await db.select().from(characters);
     return NextResponse.json(allCharacters);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Characters GET Error:", error);
-    return NextResponse.json(
-      { error: error.message || String(error) },
-      { status: 500 },
-    );
+    if (error instanceof Error) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: 500 },
+      );
+    }
+    else {
+      return NextResponse.json(
+        { error: String(error) },
+        { status: 500 },
+      );
+    }
   }
 }
 
@@ -33,7 +41,7 @@ export async function POST(request: Request) {
       .returning(); // 삽입된 데이터를 바로 반환받고 싶을 때
 
     return NextResponse.json(newPost, { status: 201 });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "데이터 저장에 실패했습니다." },
       { status: 400 },

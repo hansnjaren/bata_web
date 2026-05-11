@@ -10,6 +10,7 @@ function ThemeToggle() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
@@ -63,13 +64,13 @@ export default function NavigationButtons() {
     <div className="flex flex-wrap items-center gap-3 p-4 mb-6 border-b border-gray-200 bg-white dark:bg-gray-900 dark:border-gray-800">
       <div className="flex gap-3">
         {pathname !== "/" && <GoToButton route="/">Go to Home</GoToButton>}
-        {pathname !== "/parseTimeline" && (
+        {!pathname.startsWith("/parseTimeline") && (
           <GoToButton route="/parseTimeline">Go to parser</GoToButton>
         )}
-        {pathname !== "/tacticEditor" && (
+        {!pathname.startsWith("/tacticEditor") && (
           <GoToButton route="/tacticEditor">Go to timeline editor</GoToButton>
         )}
-        {pathname !== "/admin" && isAdmin && (
+        {!pathname.startsWith("/admin") && isAdmin && (
           <GoToButton route="/admin">Go to admin</GoToButton>
         )}
       </div>
